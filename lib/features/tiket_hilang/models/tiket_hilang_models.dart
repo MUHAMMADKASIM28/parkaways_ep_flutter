@@ -16,4 +16,6 @@ class LostTicketModel {
     this.vehicleType,
     this.totalFee = 0,
   });
+
+  set platCode(String platCode) {}
 }

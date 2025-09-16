@@ -7,7 +7,7 @@ class LostTicketController {
   final customerNameController = TextEditingController();
   final phoneController = TextEditingController();
   final idNumberController = TextEditingController();
-  final postalCodeController = TextEditingController();
+  final platCodeController = TextEditingController();
   final licensePlateController = TextEditingController();
 
   void selectVehicle(String vehicleName) {
@@ -22,26 +22,29 @@ class LostTicketController {
     }
   }
 
-  void saveTicket() {
+  String? saveTicket() {
     ticket.customerName = customerNameController.text;
     ticket.phoneNumber = phoneController.text;
     ticket.idNumber = idNumberController.text;
-    ticket.postalCode = postalCodeController.text;
-    ticket.licensePlate = licensePlateController.text;
+    ticket.platCode = platCodeController.text;
+    ticket.licensePlate = licensePlateController.text; // Pastikan vehicleType sudah di-set
 
+    // Logika Validasi
     if (ticket.customerName.isEmpty || ticket.licensePlate.isEmpty || ticket.vehicleType == null) {
-      print("Error: Data Customer, Plat Nomor, dan Jenis Kendaraan wajib diisi!");
-      return;
+      // Kembalikan pesan error spesifik
+      return 'Data tidak lengkap! Mohon isi semua field yang wajib.';
     }
 
-    print("Data Disimpan! Customer: ${ticket.customerName}, Kendaraan: ${ticket.vehicleType}, Biaya: Rp ${ticket.totalFee}");
+    print("VALIDASI BERHASIL: Data Disimpan!");
+    // Kembalikan null jika berhasil
+    return null;
   }
 
   void clearForm() {
     customerNameController.clear();
     phoneController.clear();
     idNumberController.clear();
-    postalCodeController.clear();
+    platCodeController.clear();
     licensePlateController.clear();
     // Reset model ke kondisi awal
     ticket = LostTicketModel();
@@ -51,7 +54,7 @@ class LostTicketController {
     customerNameController.dispose();
     phoneController.dispose();
     idNumberController.dispose();
-    postalCodeController.dispose();
+    platCodeController.dispose();
     licensePlateController.dispose();
   }
 }
