@@ -1,18 +1,17 @@
-// lib/widgets/transaction_details_form.dart
-
 import 'package:flutter/material.dart';
+import '../../controllers/tiket_hilang_controllers.dart';
 import 'custom_text_field.dart';
+import 'core/utils/formatters.dart';
 
-class TransactionDetailsForm extends StatefulWidget {
-  const TransactionDetailsForm({super.key});
+class TransactionDetailsForm extends StatelessWidget {
+  final LostTicketController controller;
+  final Function(String) onVehicleSelected;
 
-  @override
-  State<TransactionDetailsForm> createState() => _TransactionDetailsFormState();
-}
-
-class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
-  // 1. Ubah menjadi nullable (String?) dan hapus nilai awal.
-  String? _selectedVehicle;
+  const TransactionDetailsForm({
+    super.key,
+    required this.controller,
+    required this.onVehicleSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,23 +20,29 @@ class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
       children: [
         const Text(
           'Transaksi Tiket Hilang',
-          style: TextStyle(color: Colors.yellow, fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Color.fromRGBO(251, 192, 45, 1), fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        // Baris Kode Plat dan Nomor Plat
-        const Row(
+        Row(
           children: [
-            Expanded(child: CustomTextField(label: 'Kode Plat')),
-            SizedBox(width: 16),
-            Expanded(child: CustomTextField(label: 'Nomor Plat')),
+            // Diubah: Tambahkan flex dengan nilai lebih kecil
+            Expanded(
+              flex: 1, 
+              child: CustomTextField(label: 'Kode Plat', controller: controller.postalCodeController),
+            ),
+            const SizedBox(width: 16),
+            // Diubah: Tambahkan flex dengan nilai lebih besar
+            Expanded(
+              flex: 4,
+              child: CustomTextField(label: 'Nomor Plat', controller: controller.licensePlateController),
+            ),
           ],
         ),
         const SizedBox(height: 16),
-        const Text('Pilih jenis kendaraan', style: TextStyle(color: Colors.yellow)),
+        const Text('Pilih jenis kendaraan', style: TextStyle(color: Color.fromRGBO(251, 192, 45, 1))),
         const SizedBox(height: 8),
         Column(
           children: [
-            // Baris Atas
             Row(
               children: [
                 _buildVehicleOptionBox('Motor'),
@@ -46,23 +51,30 @@ class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
               ],
             ),
             const SizedBox(height: 10),
-            // Baris Bawah
             Row(
               children: [
-                _buildVehicleOptionBox('Motor - No Bill'),
+                _buildVehicleOptionBox('Mobil A'),
                 const SizedBox(width: 10),
-                _buildVehicleOptionBox('Mobil - No Bill'),
+                _buildVehicleOptionBox('Mobil B'),
               ],
             ),
           ],
         ),
         const SizedBox(height: 24),
         // Total Biaya
-        const Column(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Total (Rp)', style: TextStyle(color: Colors.yellow, fontSize: 16)),
-            SizedBox(height: 2),
-            Text('Rp. 0', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+            const Text(
+              'Total (Rp)',
+              style: TextStyle(color: Color.fromRGBO(251, 192, 45, 1), fontSize: 16),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Rp. ${AppFormatters.currency.format(controller.ticket.totalFee)}',
+              textAlign: TextAlign.left, 
+              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
           ],
         )
       ],
@@ -70,29 +82,26 @@ class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
   }
 
   Widget _buildVehicleOptionBox(String vehicleName) {
-    // Logika ini tetap berfungsi dengan benar
-    bool isSelected = _selectedVehicle == vehicleName;
+    bool isSelected = controller.ticket.vehicleType == vehicleName;
 
     return Expanded(
       child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedVehicle = vehicleName;
-          });
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.yellowAccent : Colors.blue.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-            border: isSelected ? Border.all(color: Colors.white, width: 1.5) : null,
-          ),
-          child: Center(
-            child: Text(
-              vehicleName,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+        onTap: () => onVehicleSelected(vehicleName),
+        child: AspectRatio(
+          aspectRatio: 8,
+          child: Container(
+            decoration: BoxDecoration(
+              color: isSelected ? Color.fromRGBO(251, 192, 45, 1) : Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: isSelected ? Border.all(color: Colors.white, width: 1.5) : null,
+            ),
+            child: Center(
+              child: Text(
+                vehicleName,
+                style: TextStyle(
+                  color: isSelected ? Colors.black : Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
