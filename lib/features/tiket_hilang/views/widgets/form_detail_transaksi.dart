@@ -28,7 +28,7 @@ class TransactionDetailsForm extends StatelessWidget {
             // Diubah: Tambahkan flex dengan nilai lebih kecil
             Expanded(
               flex: 1, 
-              child: CustomTextField(label: 'Kode Plat', controller: controller.postalCodeController),
+              child: CustomTextField(label: 'Kode Plat', controller: controller.platCodeController),
             ),
             const SizedBox(width: 16),
             // Diubah: Tambahkan flex dengan nilai lebih besar
