@@ -1,9 +1,29 @@
 import 'package:flutter/material.dart';
-import 'widgets/form_data_customer.dart'; // Path mungkin perlu disesuaikan
+import '../controllers/tiket_hilang_controllers.dart';
+import 'widgets/form_data_customer.dart';
 import 'widgets/form_detail_transaksi.dart';
 
-class LostTicketView extends StatelessWidget {
+class LostTicketView extends StatefulWidget {
   const LostTicketView({super.key});
+
+  @override
+  State<LostTicketView> createState() => _LostTicketViewState();
+}
+
+class _LostTicketViewState extends State<LostTicketView> {
+  final _controller = LostTicketController();
+
+  void _onVehicleSelected(String vehicleName) {
+    setState(() {
+      _controller.selectVehicle(vehicleName);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,30 +43,27 @@ class LostTicketView extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Card Form Customer
                     Expanded(
                       child: Card(
                         color: const Color(0xFF1A3E6E),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: CustomerDataForm(),
+                          child: CustomerDataForm(controller: _controller),
                         ),
                       ),
                     ),
                     const SizedBox(width: 16),
-                    // Card Form Transaksi
                     Expanded(
                       child: Card(
                         color: const Color(0xFF1A3E6E),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: TransactionDetailsForm(),
+                          child: TransactionDetailsForm(
+                            controller: _controller,
+                            onVehicleSelected: _onVehicleSelected,
+                          ),
                         ),
                       ),
                     ),
@@ -55,42 +72,35 @@ class LostTicketView extends StatelessWidget {
               ),
             ),
           ),
-          
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Tombol Batal
                 ElevatedButton(
                   onPressed: () {
-                    print('Tombol Batal ditekan');
+                    setState(() {
+                      _controller.clearForm();
+                    });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.yellow[700],
+                    backgroundColor: const Color.fromRGBO(251, 192, 45, 1),
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                    // Diubah: Tambahkan shape untuk mengatur sudut
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
                   ),
-                  child: const Text('BATAL', style: TextStyle(color: Colors.black)),
+                  child: const Text('BATAL', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 16),
-                // Tombol Simpan
                 ElevatedButton(
                   onPressed: () {
-                    print('Tombol Simpan Data ditekan');
+                    _controller.saveTicket();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                    // Diubah: Tambahkan shape untuk mengatur sudut
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
                   ),
-                  child: const Text('SIMPAN DATA', style: TextStyle(color: Colors.yellow)),
+                  child: const Text('SIMPAN DATA', style: TextStyle(color:Color.fromRGBO(251, 192, 45, 1), fontWeight: FontWeight.bold,)),
                 ),
               ],
             ),

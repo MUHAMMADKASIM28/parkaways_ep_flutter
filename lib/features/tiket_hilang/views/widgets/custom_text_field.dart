@@ -19,7 +19,7 @@ class CustomTextField extends StatelessWidget {
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.yellow),
+        labelStyle: const TextStyle(color: Color.fromRGBO(251, 192, 45, 1)),
         alignLabelWithHint: true,
         floatingLabelAlignment: FloatingLabelAlignment.start,
         filled: true,
