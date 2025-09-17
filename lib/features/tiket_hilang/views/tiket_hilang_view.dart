@@ -31,6 +31,12 @@ class _LostTicketViewState extends State<LostTicketView> {
     return Scaffold(
       backgroundColor: const Color(0xFF0D284D),
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
         title: const Text('Tiket Hilang'),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -113,7 +119,6 @@ class _LostTicketViewState extends State<LostTicketView> {
                       );
                     } else {
                       Fluttertoast.showToast(msg: "Data Berhasil Disimpan!");
-                      // Setelah berhasil, bersihkan form
                       setState(() {
                         _controller.clearForm();
                       });
