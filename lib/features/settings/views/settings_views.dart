@@ -55,6 +55,12 @@ class _SettingsViewState extends State<SettingsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
         title: const Text('Pengaturan'),
         backgroundColor: Colors.orange,
       ),
@@ -82,9 +88,13 @@ class _SettingsViewState extends State<SettingsView> {
                 hintText: _controller.settings.locationCode,
                 onButtonPressed: _controller.saveLocationCode,
               ),
+              // Diubah: Kembalikan textfield dan tombol untuk IP Server
               SettingItem(
-                title: 'IP Server',
-                subtitle: _controller.settings.ipServer,
+                title: 'Masukkan IP Server',
+                buttonText: 'Simpan',
+                textFieldController: _controller.ipServerController,
+                hintText: _controller.settings.ipServer,
+                onButtonPressed: _controller.saveIpServer,
               ),
             ],
           ),

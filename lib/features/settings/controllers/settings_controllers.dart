@@ -8,16 +8,16 @@ class SettingsController {
   var settings = SettingsModel();
 
   late TextEditingController locationCodeController;
-  late TextEditingController ipServerController;
+  late TextEditingController ipServerController; // <-- Dikembalikan
 
   SettingsController() {
-    // Inisialisasi data awal
-    settings.ipServer = '192.168.100.5';
+    // Inisialisasi data awal (bisa dari login atau penyimpanan lokal)
+    settings.ipServer = '';
     settings.username = 'kasir_utama';
     
     // Hubungkan controller ke data awal
     locationCodeController = TextEditingController(text: settings.locationCode);
-    ipServerController = TextEditingController(text: settings.ipServer);
+    ipServerController = TextEditingController(text: settings.ipServer); // <-- Dikembalikan
   }
 
   void saveLocationCode() {
@@ -25,6 +25,7 @@ class SettingsController {
     Fluttertoast.showToast(msg: 'Kode Plat berhasil disimpan!');
   }
   
+  // Fungsi untuk menyimpan IP Server dikembalikan
   void saveIpServer() {
     settings.ipServer = ipServerController.text;
     print('LOGIC: IP Server disimpan: ${settings.ipServer}');
@@ -42,6 +43,6 @@ class SettingsController {
 
   void dispose() {
     locationCodeController.dispose();
-    ipServerController.dispose();
+    ipServerController.dispose(); // <-- Dikembalikan
   }
 }

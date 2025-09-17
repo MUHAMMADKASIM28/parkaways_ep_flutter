@@ -9,7 +9,7 @@ class SettingsModel {
   SettingsModel({
     this.selectedPrinter = 'BluetoothPrinter',
     this.locationCode = '',
-    this.ipServer = '192.168.1.1',
+    this.ipServer = '',
     this.username = 'kasir_1',
   });
 }
