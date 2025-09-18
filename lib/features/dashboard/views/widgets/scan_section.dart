@@ -34,7 +34,7 @@ class ScanSection extends GetView<DashboardController> {
                             Container(
                               width: double.infinity,
                               height: 2,
-                              color: Colors.yellow,
+                              color: Colors.red,
                             ),
                           ],
                         ),
@@ -49,8 +49,8 @@ class ScanSection extends GetView<DashboardController> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: controller.scannedCode.value.isEmpty
-                          ? Colors.white70
-                          : Colors.yellow,
+                          ? Color(0xFFF5A623)
+                          : Color(0xFFF5A623),
                       fontSize: 16,
                     ),
                   )),

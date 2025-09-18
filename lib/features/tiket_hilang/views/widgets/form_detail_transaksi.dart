@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../controllers/tiket_hilang_controllers.dart';
 import 'custom_text_field.dart';
-import 'core/utils/formatters.dart';
+import '../../../utils/formatters.dart';
 
 class TransactionDetailsForm extends StatelessWidget {
   final LostTicketController controller;
@@ -25,13 +25,11 @@ class TransactionDetailsForm extends StatelessWidget {
         const SizedBox(height: 16),
         Row(
           children: [
-            // Diubah: Tambahkan flex dengan nilai lebih kecil
             Expanded(
-              flex: 1, 
+              flex: 1,
               child: CustomTextField(label: 'Kode Plat', controller: controller.platCodeController),
             ),
             const SizedBox(width: 16),
-            // Diubah: Tambahkan flex dengan nilai lebih besar
             Expanded(
               flex: 4,
               child: CustomTextField(label: 'Nomor Plat', controller: controller.licensePlateController),
@@ -72,7 +70,7 @@ class TransactionDetailsForm extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               'Rp. ${AppFormatters.currency.format(controller.ticket.totalFee)}',
-              textAlign: TextAlign.left, 
+              textAlign: TextAlign.left,
               style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ],
@@ -88,10 +86,12 @@ class TransactionDetailsForm extends StatelessWidget {
       child: GestureDetector(
         onTap: () => onVehicleSelected(vehicleName),
         child: AspectRatio(
+          // DIKEMBALIKAN: Ukuran aspect ratio kembali ke semula
           aspectRatio: 8,
           child: Container(
             decoration: BoxDecoration(
-              color: isSelected ? Color.fromRGBO(251, 192, 45, 1) : Colors.blue.withOpacity(0.1),
+              // DIUBAH: Logika warna sesuai permintaan
+              color: isSelected ? const Color.fromRGBO(251, 192, 45, 1) : const Color(0xFF1E1E3F),
               borderRadius: BorderRadius.circular(8),
               border: isSelected ? Border.all(color: Colors.white, width: 1.5) : null,
             ),

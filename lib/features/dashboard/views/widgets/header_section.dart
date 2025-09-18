@@ -1,19 +1,19 @@
-// features/dashboard/views/widgets/header_section.dart
-
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart'; // 1. Pastikan go_router sudah diimpor
+import 'package:go_router/go_router.dart';
 
 class HeaderSection extends StatelessWidget {
   const HeaderSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Definisikan warna baru di sini
+    const Color highlightColor = Color(0xFFF5A623);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // ... (Widget lain tidak berubah)
           const Expanded(
             child: FittedBox(
               fit: BoxFit.scaleDown,
@@ -27,7 +27,6 @@ class HeaderSection extends StatelessWidget {
           const SizedBox(width: 24),
           Row(
             children: [
-              // ... Tombol TIKET HILANG
               ElevatedButton(
                 onPressed: () {
                   context.go('/lost-ticket');
@@ -45,8 +44,8 @@ class HeaderSection extends StatelessWidget {
               const Text('Selamat Bekerja\nkasir_1', textAlign: TextAlign.right, style: TextStyle(color: Colors.white70)),
               const SizedBox(width: 16),
               IconButton(
-                icon: const Icon(Icons.settings, color: Colors.white, size: 28),
-                // 2. Ubah onPressed untuk navigasi ke halaman pengaturan
+                // DIUBAH: Warna ikon
+                icon: const Icon(Icons.settings, color: highlightColor, size: 28),
                 onPressed: () {
                   context.go('/settings');
                 },

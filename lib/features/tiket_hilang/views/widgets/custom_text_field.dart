@@ -1,5 +1,3 @@
-// lib/widgets/custom_text_field.dart
-
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -23,7 +21,8 @@ class CustomTextField extends StatelessWidget {
         alignLabelWithHint: true,
         floatingLabelAlignment: FloatingLabelAlignment.start,
         filled: true,
-        fillColor: Colors.blue.withOpacity(0.1),
+        // DIUBAH: Ganti warna background textfield di baris ini
+        fillColor: const Color(0xFF1E1E3F),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,

@@ -32,7 +32,7 @@ class _LostTicketViewState extends State<LostTicketView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D284D),
+      backgroundColor: const Color(0xFF1E1E3F),
       appBar: AppBar(
         foregroundColor: Colors.white,
         leading: IconButton(
@@ -57,7 +57,7 @@ class _LostTicketViewState extends State<LostTicketView> {
                   children: [
                     Expanded(
                       child: Card(
-                        color: const Color(0xFF1A3E6E),
+                        color: const Color(0xFF2C2F48),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                         child: Padding(
@@ -69,7 +69,7 @@ class _LostTicketViewState extends State<LostTicketView> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: Card(
-                        color: const Color(0xFF1A3E6E),
+                        color: const Color(0xFF2C2F48),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                         child: Padding(

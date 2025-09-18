@@ -20,7 +20,7 @@ class DurasiSection extends GetView<DashboardController> {
             ),
             child: Obx(() {
               if (controller.vehicleImageUrl.value.isEmpty) {
-                return const Icon(Icons.image_outlined, color: Colors.white38, size: 50);
+                return const Icon(Icons.image_outlined, color: Color(0xFFF5A623), size: 130);
               } else {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(8),
@@ -28,7 +28,6 @@ class DurasiSection extends GetView<DashboardController> {
                     controller.vehicleImageUrl.value,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      // Fallback jika gambar gagal dimuat
                       return const Icon(Icons.broken_image_outlined, color: Colors.white38, size: 50);
                     },
                   ),
@@ -53,12 +52,16 @@ class InfoText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Definisikan warna baru di sini
+    const Color highlightColor = Color(0xFFF5A623);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: Colors.white54)),
+          // DIUBAH: Warna teks label
+          Text(label, style: const TextStyle(color: highlightColor)),
           Text(value, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
         ],
       ),

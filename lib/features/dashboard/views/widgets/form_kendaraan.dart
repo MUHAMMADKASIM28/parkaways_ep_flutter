@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/dashboard_controllers.dart';
+import '../../../utils/formatters.dart';
 
 class FormKendaraan extends GetView<DashboardController> {
   const FormKendaraan({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Definisikan warna baru di sini
+    const Color highlightColor = Color(0xFFF5A623);
+
     return Obx(() {
       final bool isActive = controller.isTransactionActive.value;
       final Color borderColor = isActive ? Colors.white54 : Colors.white12;
-      final Color labelColor = isActive ? Colors.white54 : Colors.white24;
       final Color plateBgColor = isActive ? Colors.transparent : Colors.white10;
 
       return Column(
@@ -30,7 +33,7 @@ class FormKendaraan extends GetView<DashboardController> {
                           borderRadius: BorderRadius.circular(8),
                           color: plateBgColor,
                         ),
-                        child: Text('DD', style: TextStyle(color: labelColor, fontSize: 18)),
+                        child: Text('DD', style: TextStyle(color: isActive ? Colors.white54 : Colors.white24, fontSize: 18)),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -40,7 +43,8 @@ class FormKendaraan extends GetView<DashboardController> {
                           style: TextStyle(color: isActive ? Colors.white : Colors.white54),
                           decoration: InputDecoration(
                             labelText: 'Nomor Plat',
-                            labelStyle: TextStyle(color: labelColor),
+                            // DIUBAH: Warna label textfield
+                            labelStyle: TextStyle(color: isActive ? highlightColor : Colors.white24),
                             filled: true,
                             fillColor: plateBgColor,
                             disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white12)),
@@ -52,7 +56,8 @@ class FormKendaraan extends GetView<DashboardController> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  Text('Jenis Kendaraan', style: TextStyle(color: isActive ? Colors.white : Colors.white54, fontSize: 16)),
+                  // DIUBAH: Warna teks jenis kendaraan
+                  Text('Jenis Kendaraan', style: TextStyle(color: isActive ? highlightColor : Colors.white54, fontSize: 16)),
                   const SizedBox(height: 12),
                   GridView.count(
                     crossAxisCount: 2,
@@ -74,8 +79,9 @@ class FormKendaraan extends GetView<DashboardController> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Total (Rp)', style: TextStyle(color: isActive ? Colors.white70 : Colors.white38, fontSize: 18)),
-                      Text('Rp ${controller.total.value}', style: TextStyle(color: isActive ? Colors.white : Colors.white54, fontSize: 28, fontWeight: FontWeight.bold)),
+                      // DIUBAH: Warna teks total
+                      Text('Total (Rp)', style: TextStyle(color: isActive ? highlightColor : Colors.white38, fontSize: 18)),
+                      Text('Rp. ${AppFormatters.currency.format(controller.total.value)}', style: TextStyle(color: isActive ? Colors.white : Colors.white54, fontSize: 28, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ],
@@ -85,9 +91,9 @@ class FormKendaraan extends GetView<DashboardController> {
           const SizedBox(height: 24),
           Row(
             children: [
-              Expanded(child: ElevatedButton(onPressed: isActive ? controller.bayarCash : null, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4A4E6A), padding: const EdgeInsets.symmetric(vertical: 20)), child: const Text('BAYAR CASH', style: TextStyle(fontSize: 16)))),
+              Expanded(child: ElevatedButton(onPressed: isActive ? controller.bayarCash : null, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2A3A93), padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))), child: const Text('BAYAR CASH', style: TextStyle(fontSize: 16, color: Colors.white)))),
               const SizedBox(width: 16),
-              Expanded(child: ElevatedButton(onPressed: isActive ? controller.bayarQris : null, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4A90E2), padding: const EdgeInsets.symmetric(vertical: 20)), child: const Text('BAYAR QRIS', style: TextStyle(fontSize: 16)))),
+              Expanded(child: ElevatedButton(onPressed: isActive ? controller.bayarQris : null, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4A90E2), padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))), child: const Text('BAYAR QRIS', style: TextStyle(fontSize: 16, color: Colors.white)))),
             ],
           )
         ],
@@ -96,6 +102,7 @@ class FormKendaraan extends GetView<DashboardController> {
   }
 }
 
+// ... (Class VehicleButton tidak berubah)
 class VehicleButton extends StatelessWidget {
   final String label;
   final bool isSelected;

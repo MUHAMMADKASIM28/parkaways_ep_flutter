@@ -10,18 +10,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6386ad4b-4e19-482b-b511-8294bcec676b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/lib/features/dashboard/dashboard.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/features/dashboard/views/bayar.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/features/dashboard/views/proses.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/features/dashboard/views/waktu.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/dashboard/controllers/dashboard_controllers.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/dashboard/controllers/dashboard_controllers.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/dashboard/models/dashboard_models.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/dashboard/models/dashboard_models.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/dashboard/views/dashboard_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/dashboard/views/dashboard_view.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parkaways_ep_flutter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/parkaways_ep_flutter.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/dashboard/views/widgets/durasi_section.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/dashboard/views/widgets/durasi_section.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/dashboard/views/widgets/form_kendaraan.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/dashboard/views/widgets/form_kendaraan.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/dashboard/views/widgets/header_section.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/dashboard/views/widgets/header_section.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/dashboard/views/widgets/scan_section.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/dashboard/views/widgets/scan_section.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/tiket_hilang/views/tiket_hilang_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/tiket_hilang/views/tiket_hilang_view.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/tiket_hilang/views/widgets/custom_text_field.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/tiket_hilang/views/widgets/custom_text_field.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/tiket_hilang/views/widgets/form_detail_transaksi.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/tiket_hilang/views/widgets/form_detail_transaksi.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -80,10 +78,10 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "dashboard",
+    "git-widget-placeholder": "main",
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/asus/AndroidStudioProjects/project_flutter",
+    "last_opened_file_path": "C:/MAGANG BSS/parkaways_ep_flutter",
     "settings.editor.selected.configurable": "dart.settings",
     "show.migrate.to.gradle.popup": "false"
   }
