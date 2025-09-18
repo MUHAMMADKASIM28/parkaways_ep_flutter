@@ -1,11 +1,17 @@
-class DashboardModel {
-  String appBarTitle;
-  String settingsText;
-  String lostTicketText;
+// dashboard_models.dart
 
-  DashboardModel({
-    this.appBarTitle = "Parkways Express Payment- BSS Office",
-    this.settingsText = "Pengaturan",
-    this.lostTicketText = "TIKET HILANG",
+class TransactionData {
+  final String plateNumber;
+  final String vehicleType;
+  final DateTime entryTime;
+  final DateTime scanTime;
+  final int totalCost;
+
+  TransactionData({
+    required this.plateNumber,
+    required this.vehicleType,
+    required this.entryTime,
+    required this.scanTime,
+    required this.totalCost,
   });
 }

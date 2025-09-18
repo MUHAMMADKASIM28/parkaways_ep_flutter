@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'features/dashboard/dashboard.dart';
-import 'features/dashboard/views/dashboard_view.dart';
-import 'package:device_preview/device_preview.dart';
+import 'package:get/get.dart';
+import 'features/dashboard/views/dashboard_view.dart'; // Sesuaikan path import ini
 
 void main() {
-  runApp(
-    DevicePreview(builder: ((context) => const MyApp())),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -14,14 +11,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Parkways Express Payment',
+      debugShowCheckedModeBanner: false, // Menghilangkan banner debug
       theme: ThemeData(
+        brightness: Brightness.dark, // Mengatur tema gelap
         primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: const Color(0xFF001F3F), // Navy blue
+        fontFamily: 'Poppins', // Opsional: Anda bisa menambahkan font custom
       ),
-      home: DashboardView(),
-      debugShowCheckedModeBanner: false,
+      
+      // Mengatur halaman awal aplikasi
+      initialRoute: '/',
+      
+      // Mendefinisikan semua halaman yang bisa diakses
+      getPages: [
+        GetPage(
+          name: '/',
+          page: () => const DashboardView(),
+          binding: DashboardBinding(), // Menghubungkan View dengan Controller-nya
+        ),
+        // Anda bisa menambahkan halaman lain di sini nanti
+        // GetPage(name: '/settings', page: () => SettingsScreen()),
+      ],
     );
   }
 }
