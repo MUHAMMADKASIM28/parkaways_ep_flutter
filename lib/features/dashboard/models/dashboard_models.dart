@@ -1,5 +1,3 @@
-// dashboard_models.dart
-
 class TransactionData {
   final String plateNumber;
   final String vehicleType;
