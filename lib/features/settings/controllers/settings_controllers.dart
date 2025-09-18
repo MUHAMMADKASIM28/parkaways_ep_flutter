@@ -2,24 +2,22 @@
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart'; // 1. Impor go_router
 import '../models/settings_models.dart';
 
 class SettingsController {
   var settings = SettingsModel();
-
   late TextEditingController locationCodeController;
   late TextEditingController ipServerController;
 
   SettingsController() {
-    // Inisialisasi data awal
     settings.ipServer = '192.168.100.5';
     settings.username = 'kasir_utama';
-    
-    // Hubungkan controller ke data awal
     locationCodeController = TextEditingController(text: settings.locationCode);
     ipServerController = TextEditingController(text: settings.ipServer);
   }
 
+  // ... (fungsi lain tidak berubah)
   void saveLocationCode() {
     settings.locationCode = locationCodeController.text;
     Fluttertoast.showToast(msg: 'Kode Plat berhasil disimpan!');
@@ -36,8 +34,10 @@ class SettingsController {
     Fluttertoast.showToast(msg: 'Printer diatur ke: $newPrinter');
   }
 
-  void endSession() {
-    Fluttertoast.showToast(msg: 'Anda telah keluar.');
+  // 2. Tambahkan BuildContext dan panggil navigasi di sini
+  void endSession(BuildContext context) {
+    // Navigasi kembali ke halaman login dan hapus semua halaman sebelumnya
+    context.go('/login');
   }
 
   void dispose() {

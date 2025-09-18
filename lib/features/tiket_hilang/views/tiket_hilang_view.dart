@@ -1,4 +1,7 @@
+// features/tiket_hilang/views/tiket_hilang_view.dart
+
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart'; // 1. Impor go_router
 import '../controllers/tiket_hilang_controllers.dart';
 import 'widgets/form_data_customer.dart';
 import 'widgets/form_detail_transaksi.dart';
@@ -31,10 +34,12 @@ class _LostTicketViewState extends State<LostTicketView> {
     return Scaffold(
       backgroundColor: const Color(0xFF0D284D),
       appBar: AppBar(
+        foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
+          // 2. Ubah onPressed untuk kembali ke dashboard
           onPressed: () {
-            Navigator.of(context).pop();
+            context.go('/dashboard');
           },
         ),
         title: const Text('Tiket Hilang'),
@@ -87,10 +92,9 @@ class _LostTicketViewState extends State<LostTicketView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
+                  // 3. Ubah onPressed tombol Batal untuk kembali ke dashboard
                   onPressed: () {
-                    setState(() {
-                      _controller.clearForm();
-                    });
+                    context.go('/dashboard');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(251, 192, 45, 1),
@@ -119,9 +123,8 @@ class _LostTicketViewState extends State<LostTicketView> {
                       );
                     } else {
                       Fluttertoast.showToast(msg: "Data Berhasil Disimpan!");
-                      setState(() {
-                        _controller.clearForm();
-                      });
+                      // Setelah berhasil, kembali ke dashboard
+                      context.go('/dashboard');
                     }
                   },
                   style: ElevatedButton.styleFrom(

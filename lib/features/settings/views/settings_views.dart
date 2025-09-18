@@ -1,6 +1,7 @@
 // lib/features/settings/views/settings_view.dart
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../controllers/settings_controllers.dart';
 import 'widgets/settings_group.dart';
 import 'widgets/settings_item.dart';
@@ -20,6 +21,7 @@ class _SettingsViewState extends State<SettingsView> {
     super.dispose();
   }
 
+  // ... (fungsi _showPrinterDialog tidak berubah)
   void _showPrinterDialog() {
     showDialog(
       context: context,
@@ -51,12 +53,21 @@ class _SettingsViewState extends State<SettingsView> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pengaturan'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.go('/dashboard'),
+        ),
+        title: const Text(
+          'Pengaturan',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.orange,
+        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -82,9 +93,12 @@ class _SettingsViewState extends State<SettingsView> {
                 hintText: _controller.settings.locationCode,
                 onButtonPressed: _controller.saveLocationCode,
               ),
+              // 👇 UBAH BAGIAN INI 👇
               SettingItem(
                 title: 'IP Server',
-                subtitle: _controller.settings.ipServer,
+                buttonText: 'Simpan', // Tambahkan tombol simpan
+                textFieldController: _controller.ipServerController, // Gunakan text controller
+                onButtonPressed: _controller.saveIpServer, // Panggil fungsi simpan
               ),
             ],
           ),
@@ -95,7 +109,7 @@ class _SettingsViewState extends State<SettingsView> {
                 title: 'User Login',
                 subtitle: _controller.settings.username,
                 buttonText: 'Akhiri Sesi',
-                onButtonPressed: _controller.endSession,
+                onButtonPressed: () => _controller.endSession(context),
                 isLogoutButton: true,
               ),
             ],

@@ -1,5 +1,7 @@
+// features/dashboard/views/widgets/header_section.dart
+
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:go_router/go_router.dart'; // 1. Pastikan go_router sudah diimpor
 
 class HeaderSection extends StatelessWidget {
   const HeaderSection({super.key});
@@ -11,11 +13,12 @@ class HeaderSection extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
+          // ... (Widget lain tidak berubah)
+          const Expanded(
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: const Text(
+              child: Text(
                 'Parkways Express Payment - BSS Office',
                 style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
               ),
@@ -24,9 +27,10 @@ class HeaderSection extends StatelessWidget {
           const SizedBox(width: 24),
           Row(
             children: [
+              // ... Tombol TIKET HILANG
               ElevatedButton(
                 onPressed: () {
-                  Get.snackbar('Info', 'Tombol Tiket Hilang Ditekan');
+                  context.go('/lost-ticket');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink,
@@ -42,8 +46,9 @@ class HeaderSection extends StatelessWidget {
               const SizedBox(width: 16),
               IconButton(
                 icon: const Icon(Icons.settings, color: Colors.white, size: 28),
+                // 2. Ubah onPressed untuk navigasi ke halaman pengaturan
                 onPressed: () {
-                  Get.snackbar('Info', 'Tombol Pengaturan Ditekan');
+                  context.go('/settings');
                 },
                 tooltip: 'Pengaturan',
               ),

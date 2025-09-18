@@ -5,6 +5,7 @@ import 'widgets/durasi_section.dart';
 import 'widgets/form_kendaraan.dart';
 import 'widgets/header_section.dart';
 import 'widgets/scan_section.dart';
+import 'package:go_router/go_router.dart';
 
 class DashboardBinding extends Bindings {
   @override
