@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../controllers/settings_controllers.dart';
 import 'widgets/settings_group.dart';
 import 'widgets/settings_item.dart';
+// DIUBAH: Perbaiki cara impor package di sini
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
@@ -14,33 +16,46 @@ class SettingsView extends StatefulWidget {
 
 class _SettingsViewState extends State<SettingsView> {
   final _controller = SettingsController();
+  List<BluetoothDevice> _devices = [];
+  bool _isLoading = false;
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _getBluetoothDevices();
   }
 
-  // ... (fungsi _showPrinterDialog tidak berubah)
+  void _getBluetoothDevices() async {
+    setState(() => _isLoading = true);
+    try {
+      _devices = await BlueThermalPrinter.instance.getBondedDevices();
+    } catch (e) {
+      print("Error getting devices: $e");
+    }
+    setState(() => _isLoading = false);
+  }
+
   void _showPrinterDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        final List<String> printers = ['Default Printer', 'BluetoothPrinter'];
-
         return AlertDialog(
-          title: const Text('Pilih Printer'),
+          title: const Text('Pilih Printer Bluetooth'),
           content: SizedBox(
             width: double.minPositive,
-            child: ListView.builder(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
               shrinkWrap: true,
-              itemCount: printers.length,
+              itemCount: _devices.length,
               itemBuilder: (context, index) {
+                final device = _devices[index];
                 return ListTile(
-                  title: Text(printers[index]),
+                  title: Text(device.name ?? 'Unknown Device'),
+                  subtitle: Text(device.address ?? ''),
                   onTap: () {
                     setState(() {
-                      _controller.selectPrinter(printers[index]);
+                      _controller.selectPrinter(device);
                     });
                     Navigator.of(context).pop();
                   },
@@ -48,11 +63,22 @@ class _SettingsViewState extends State<SettingsView> {
               },
             ),
           ),
+          actions: [
+            TextButton(
+              onPressed: _getBluetoothDevices,
+              child: const Text('REFRESH'),
+            ),
+          ],
         );
       },
     );
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,12 +88,8 @@ class _SettingsViewState extends State<SettingsView> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.go('/dashboard'),
         ),
-        title: const Text(
-          'Pengaturan',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Pengaturan', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -77,7 +99,9 @@ class _SettingsViewState extends State<SettingsView> {
             children: [
               SettingItem(
                 title: 'Printer',
-                subtitle: _controller.settings.selectedPrinter,
+                subtitle: _controller.settings.selectedPrinterName.isNotEmpty
+                    ? _controller.settings.selectedPrinterName
+                    : 'Belum ada printer terpilih',
                 buttonText: 'Atur Printer',
                 onButtonPressed: _showPrinterDialog,
               ),
@@ -90,15 +114,13 @@ class _SettingsViewState extends State<SettingsView> {
                 title: 'Masukkan Kode Plat',
                 buttonText: 'Simpan',
                 textFieldController: _controller.locationCodeController,
-                hintText: _controller.settings.locationCode,
                 onButtonPressed: _controller.saveLocationCode,
               ),
-              // 👇 UBAH BAGIAN INI 👇
               SettingItem(
                 title: 'IP Server',
-                buttonText: 'Simpan', // Tambahkan tombol simpan
-                textFieldController: _controller.ipServerController, // Gunakan text controller
-                onButtonPressed: _controller.saveIpServer, // Panggil fungsi simpan
+                buttonText: 'Simpan',
+                textFieldController: _controller.ipServerController,
+                onButtonPressed: _controller.saveIpServer,
               ),
             ],
           ),

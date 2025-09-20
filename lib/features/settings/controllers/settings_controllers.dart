@@ -1,8 +1,9 @@
 // lib/features/settings/controllers/settings_controller.dart
 
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart'; // 1. Impor go_router
+import 'package:go_router/go_router.dart';
 import '../models/settings_models.dart';
 
 class SettingsController {
@@ -17,26 +18,32 @@ class SettingsController {
     ipServerController = TextEditingController(text: settings.ipServer);
   }
 
-  // ... (fungsi lain tidak berubah)
+  // Fungsi ini menerima objek BluetoothDevice
+  void selectPrinter(BluetoothDevice device) {
+    settings.selectedPrinterName = device.name ?? 'Unknown Device';
+    settings.selectedPrinterAddress = device.address ?? '';
+
+    // Langsung coba hubungkan ke printer yang dipilih
+    BlueThermalPrinter.instance.connect(device).then((isConnected) {
+      if (isConnected == true) {
+        Fluttertoast.showToast(msg: 'Terhubung ke: ${settings.selectedPrinterName}');
+      } else {
+        Fluttertoast.showToast(msg: 'Gagal terhubung ke printer', backgroundColor: Colors.red);
+      }
+    });
+  }
+
   void saveLocationCode() {
     settings.locationCode = locationCodeController.text;
     Fluttertoast.showToast(msg: 'Kode Plat berhasil disimpan!');
   }
-  
+
   void saveIpServer() {
     settings.ipServer = ipServerController.text;
-    print('LOGIC: IP Server disimpan: ${settings.ipServer}');
     Fluttertoast.showToast(msg: 'IP Server berhasil disimpan!');
   }
 
-  void selectPrinter(String newPrinter) {
-    settings.selectedPrinter = newPrinter;
-    Fluttertoast.showToast(msg: 'Printer diatur ke: $newPrinter');
-  }
-
-  // 2. Tambahkan BuildContext dan panggil navigasi di sini
   void endSession(BuildContext context) {
-    // Navigasi kembali ke halaman login dan hapus semua halaman sebelumnya
     context.go('/login');
   }
 

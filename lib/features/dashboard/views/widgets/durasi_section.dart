@@ -1,3 +1,5 @@
+// lib/features/dashboard/views/widgets/durasi_section.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/dashboard_controllers.dart';
@@ -37,6 +39,7 @@ class DurasiSection extends GetView<DashboardController> {
           ),
         ),
         const SizedBox(height: 24),
+        // DIUBAH: Bungkus semua InfoText dengan Obx agar nilainya dinamis
         Obx(() => InfoText(label: 'Waktu Masuk', value: controller.waktuMasuk.value)),
         Obx(() => InfoText(label: 'Waktu Scan', value: controller.waktuScan.value)),
         Obx(() => InfoText(label: 'Durasi', value: controller.durasi.value)),
@@ -52,7 +55,6 @@ class InfoText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Definisikan warna baru di sini
     const Color highlightColor = Color(0xFFF5A623);
 
     return Padding(
@@ -60,7 +62,6 @@ class InfoText extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // DIUBAH: Warna teks label
           Text(label, style: const TextStyle(color: highlightColor)),
           Text(value, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
         ],
