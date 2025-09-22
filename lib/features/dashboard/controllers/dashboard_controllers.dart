@@ -4,183 +4,208 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import '../models/dashboard_models.dart';
+import '../models/transaction_model.dart';
 import '../../../services/api_service.dart';
 import '../../../services/printer_service.dart';
+import '../models/dashboard_models.dart';
 
 class DashboardController extends GetxController {
-  // Instance untuk layanan
-  final ApiService _apiService = ApiService();
+  // --- Inisialisasi Service ---
+  // TODO: Ganti IP hardcoded ini dengan IP yang disimpan dari halaman login
+  final ApiService _apiService = ApiService(ipServer: '192.168.18.151');
   final PrinterService _printerService = PrinterService();
 
-  // Controller UI
+  // --- Controller UI ---
   final MobileScannerController cameraController = MobileScannerController();
+  final TextEditingController platePrefixController = TextEditingController();
   final TextEditingController plateNumberController = TextEditingController();
   final TextEditingController manualTicketController = TextEditingController();
 
-  // State UI
+  // --- State UI & Data ---
   var isTransactionActive = false.obs;
   var vehicleImageUrl = ''.obs;
   var scannedCode = ''.obs;
-  var selectedVehicle = ''.obs;
+  var selectedVehicleId = 0.obs;
   var total = 0.obs;
-
-  // State Data Transaksi
   var waktuMasuk = "0000-00-00 00:00:00".obs;
   var waktuScan = "0000-00-00 00:00:00".obs;
   var durasi = "-".obs;
-  var transactionData = Rxn<TransactionData>();
+  var currentTransaction = Rxn<TransactionModel>();
 
-  // Getter untuk format Rupiah
   String get formattedTotal {
     final formatCurrency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     return formatCurrency.format(total.value);
   }
 
-  @override
-  void onInit() {
-    super.onInit();
-    isTransactionActive.value = false;
+  String getFullImageUrl() {
+    final String baseUrl = _apiService.baseUrl.replaceAll('/api', '');
+    final String imagePath = vehicleImageUrl.value;
+    return '$baseUrl/$imagePath';
   }
 
   void onQrCodeDetected(BarcodeCapture capture) {
     final String? code = capture.barcodes.first.rawValue;
     if (code != null && code.isNotEmpty) {
       manualTicketController.text = code;
-      processTicketCode(code);
+      prosesTransaksi();
     }
   }
 
-  void processTicketCode(String code) {
-    if (code.isEmpty) return;
-    scannedCode.value = code;
-    fetchTicketData(code);
+  void prosesTransaksi() {
+    final String ticketCode = manualTicketController.text;
+    if (ticketCode.isEmpty) {
+      Get.snackbar('Gagal', 'Silakan scan atau masukkan kode tiket.', backgroundColor: Colors.red, colorText: Colors.white);
+      return;
+    }
+    FocusManager.instance.primaryFocus?.unfocus();
+    scannedCode.value = ticketCode;
+    fetchTicketData(ticketCode);
   }
 
-  // DIUBAH: Fungsi ini sekarang memproses data setelah scan
-  void fetchTicketData(String ticketCode) {
-    // --- SIMULASI MENDAPATKAN DATA ---
-    // Di aplikasi nyata, Anda akan memanggil API di sini.
-    // Untuk sekarang, kita buat data dummy.
-    final entryTime = DateTime.now().subtract(const Duration(hours: 2, minutes: 35)); // Anggap masuk 2 jam 35 menit lalu
-    final scanTime = DateTime.now();
-    const plateNumber = 'DD 1234 AB';
-    const vehicleType = 'Mobil';
-    // --- AKHIR SIMULASI ---
+  Future<void> fetchTicketData(String ticketCode) async {
+    try {
+      final transactionResult = await _apiService.checkTransaction(transactionCode: ticketCode);
+      if (transactionResult.status == "success" || transactionResult.status == "sudah") {
+        currentTransaction.value = transactionResult;
+        waktuMasuk.value = transactionResult.waktuMasuk;
+        waktuScan.value = transactionResult.waktuScan;
+        durasi.value = transactionResult.durasi;
+        vehicleImageUrl.value = transactionResult.camIn;
 
-    // Tampilkan notifikasi
-    Get.snackbar(
-      'Scan Berhasil',
-      'Kode Tiket: $ticketCode',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
+        final String policeNumberFromApi = transactionResult.policeNumber;
+        if (policeNumberFromApi.contains(" ")) {
+          final parts = policeNumberFromApi.split(" ");
+          platePrefixController.text = parts.first;
+          plateNumberController.text = parts.sublist(1).join(" ");
+        } else {
+          platePrefixController.text = '';
+          plateNumberController.text = policeNumberFromApi == "-" ? "" : policeNumberFromApi;
+        }
 
-    // Hitung durasi
-    final difference = scanTime.difference(entryTime);
-    final hours = difference.inHours;
-    final minutes = difference.inMinutes.remainder(60);
-    final seconds = difference.inSeconds.remainder(60);
+        final int vehicleIdFromApi = int.tryParse(transactionResult.vehicleId) ?? 0;
+        selectedVehicleId.value = vehicleIdFromApi;
+        isTransactionActive.value = transactionResult.status == "success";
 
-    // Update state yang akan ditampilkan di UI
-    final dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
-    waktuMasuk.value = dateFormat.format(entryTime);
-    waktuScan.value = dateFormat.format(scanTime);
-    durasi.value = '${hours}j ${minutes}m ${seconds}d';
-    plateNumberController.text = plateNumber;
-    selectVehicle(vehicleType); // Otomatis pilih jenis kendaraan
-
-    // Simpan data transaksi
-    transactionData.value = TransactionData(
-      plateNumber: plateNumber,
-      vehicleType: vehicleType,
-      entryTime: entryTime,
-      scanTime: scanTime,
-      totalCost: 0, // Akan dihitung selanjutnya
-    );
-
-    calculateTotal(); // Hitung total biaya
-    isTransactionActive.value = true;
+        if (transactionResult.status == "sudah") {
+          total.value = int.tryParse(transactionResult.total) ?? 0;
+          Get.snackbar('Informasi', 'Tiket ini sudah dibayar.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.orange, colorText: Colors.white);
+        } else {
+          if (vehicleIdFromApi > 0) {
+            await calculateTotal();
+          } else {
+            total.value = 0;
+          }
+          Get.snackbar('Berhasil', 'Data tiket ditemukan.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green, colorText: Colors.white);
+        }
+      } else {
+        clearTransaction();
+        Get.snackbar('Informasi', transactionResult.statusTiket, backgroundColor: Colors.orange, colorText: Colors.white);
+      }
+    } on ApiException catch (e) {
+      clearTransaction();
+      Get.snackbar('Error API', e.toString(), backgroundColor: Colors.red, colorText: Colors.white);
+    }
   }
 
-  void selectVehicle(String vehicleType) {
-    selectedVehicle.value = vehicleType;
-  }
-
-  // DIUBAH: Kalkulasi berdasarkan durasi
-  void calculateTotal() {
-    if (transactionData.value == null) {
+  Future<void> calculateTotal() async {
+    if (currentTransaction.value == null || selectedVehicleId.value == 0) {
       total.value = 0;
       return;
     }
-
-    // Ambil durasi dalam jam, bulatkan ke atas
-    int hours = transactionData.value!.scanTime.difference(transactionData.value!.entryTime).inHours;
-    if (transactionData.value!.scanTime.difference(transactionData.value!.entryTime).inMinutes.remainder(60) > 0) {
-      hours++; // Jika ada sisa menit, hitung sebagai 1 jam
+    try {
+      final String fullPoliceNumber = '${platePrefixController.text} ${plateNumberController.text}';
+      final priceResult = await _apiService.checkPrice(
+        transactionCode: currentTransaction.value!.transactionCode,
+        vehicleId: selectedVehicleId.value,
+        policeNumber: fullPoliceNumber.trim().isEmpty ? "-" : fullPoliceNumber.trim(),
+      );
+      total.value = priceResult['total'] ?? 0;
+    } on ApiException catch (e) {
+      Get.snackbar('Error Hitung Harga', e.toString(), backgroundColor: Colors.red, colorText: Colors.white);
     }
-    if (hours == 0) hours = 1; // Parkir minimal 1 jam
-
-    int rate = 0;
-    if (selectedVehicle.value.contains('Motor')) {
-      rate = 2000;
-    } else if (selectedVehicle.value.contains('Mobil')) {
-      rate = 5000;
-    }
-    total.value = rate * hours;
   }
 
-  // BARU: Fungsi untuk membersihkan semua data setelah transaksi
+  void changeVehicle(int newVehicleId) {
+    if (!isTransactionActive.value) return;
+    selectedVehicleId.value = newVehicleId;
+    calculateTotal();
+  }
+
   void clearTransaction() {
     scannedCode.value = '';
+    platePrefixController.text = 'DD';
     plateNumberController.clear();
     manualTicketController.clear();
-    selectedVehicle.value = '';
+    selectedVehicleId.value = 0;
     total.value = 0;
     waktuMasuk.value = "0000-00-00 00:00:00";
     waktuScan.value = "0000-00-00 00:00:00";
     durasi.value = "-";
-    transactionData.value = null;
+    currentTransaction.value = null;
     isTransactionActive.value = false;
     vehicleImageUrl.value = '';
   }
 
-  void prosesTransaksi() {
-    if (manualTicketController.text.isEmpty) {
-      Get.snackbar('Gagal', 'Silakan scan atau masukkan kode tiket.', backgroundColor: Colors.red, colorText: Colors.white);
-      return;
-    }
-    processTicketCode(manualTicketController.text);
-  }
-
-  Future<void> _handlePayment() async {
-    if (!isTransactionActive.value || transactionData.value == null) {
+  Future<void> _handlePayment(String paymentType) async {
+    if (!isTransactionActive.value || currentTransaction.value == null) {
       Get.snackbar('Gagal', 'Tidak ada transaksi untuk dibayar.', backgroundColor: Colors.red, colorText: Colors.white);
       return;
     }
-    try {
-      // Panggil service printer
-      await _printerService.printReceipt(transactionData.value!, total.value, 'kasir_1');
 
-      // Bersihkan transaksi setelah berhasil cetak
+    final String platePrefix = platePrefixController.text;
+    final String plateNumber = plateNumberController.text;
+
+    if (platePrefix.isEmpty || plateNumber.isEmpty) {
+      Get.snackbar('Validasi Gagal', 'Mohon isi Kode Plat dan Nomor Plat.', backgroundColor: Colors.red, colorText: Colors.white);
+      return;
+    }
+    if (selectedVehicleId.value == 0) {
+      Get.snackbar('Validasi Gagal', 'Mohon pilih Jenis Kendaraan.', backgroundColor: Colors.red, colorText: Colors.white);
+      return;
+    }
+
+    try {
+      const int currentShift = 1;
+      const int adminId = 3;
+      final String fullPoliceNumber = '$platePrefix $plateNumber';
+      
+      // --- PERBAIKAN DI SINI ---
+      await _apiService.updatePayment(
+        transactionCode: currentTransaction.value!.transactionCode,
+        policeNumber: fullPoliceNumber.trim(),
+        shift: currentShift,
+        total: total.value,
+        adminId: adminId,
+        paymentType: paymentType,
+        vehicleId: selectedVehicleId.value, // <-- BARU: Kirim vehicleId
+      );
+      // --- AKHIR PERBAIKAN ---
+      
+      final printData = TransactionData(
+        plateNumber: fullPoliceNumber.trim(),
+        vehicleType: selectedVehicleId.value == 1 ? "Motor" : "Mobil",
+        entryTime: DateFormat('yyyy-MM-dd HH:mm:ss').parse(waktuMasuk.value),
+        scanTime: DateFormat('yyyy-MM-dd HH:mm:ss').parse(waktuScan.value),
+        totalCost: total.value
+      );
+
+      await _printerService.printReceipt(printData, total.value, 'kasir_1');
       clearTransaction();
-      Get.snackbar('Selesai', 'Transaksi berhasil dan struk tercetak.', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Selesai', 'Transaksi berhasil dan struk tercetak.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green, colorText: Colors.white);
+    
+    } on ApiException catch (e) {
+      Get.snackbar('Error Pembayaran', e.toString(), backgroundColor: Colors.red, colorText: Colors.white, duration: const Duration(seconds: 5));
     } catch (e) {
       Get.snackbar('Error Cetak', e.toString(), backgroundColor: Colors.red, colorText: Colors.white, duration: const Duration(seconds: 5));
     }
   }
 
-  void bayarCash() {
-    _handlePayment();
-  }
-
-  void bayarQris() {
-    _handlePayment();
-  }
+  void bayarCash() => _handlePayment('cash');
+  void bayarQris() => _handlePayment('cash');
 
   @override
   void onClose() {
+    platePrefixController.dispose();
     plateNumberController.dispose();
     manualTicketController.dispose();
     cameraController.dispose();

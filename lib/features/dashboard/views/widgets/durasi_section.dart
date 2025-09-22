@@ -24,11 +24,16 @@ class DurasiSection extends GetView<DashboardController> {
               if (controller.vehicleImageUrl.value.isEmpty) {
                 return const Icon(Icons.image_outlined, color: Color(0xFFF5A623), size: 130);
               } else {
+                final String fullImageUrl = controller.getFullImageUrl();
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    controller.vehicleImageUrl.value,
+                  child: Image.network(
+                    fullImageUrl,
                     fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const Center(child: CircularProgressIndicator(color: Colors.white));
+                    },
                     errorBuilder: (context, error, stackTrace) {
                       return const Icon(Icons.broken_image_outlined, color: Colors.white38, size: 50);
                     },
@@ -39,7 +44,6 @@ class DurasiSection extends GetView<DashboardController> {
           ),
         ),
         const SizedBox(height: 24),
-        // DIUBAH: Bungkus semua InfoText dengan Obx agar nilainya dinamis
         Obx(() => InfoText(label: 'Waktu Masuk', value: controller.waktuMasuk.value)),
         Obx(() => InfoText(label: 'Waktu Scan', value: controller.waktuScan.value)),
         Obx(() => InfoText(label: 'Durasi', value: controller.durasi.value)),

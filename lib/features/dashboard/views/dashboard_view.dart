@@ -1,3 +1,5 @@
+// lib/features/dashboard/views/dashboard_view.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/dashboard_controllers.dart';
@@ -5,7 +7,6 @@ import 'widgets/durasi_section.dart';
 import 'widgets/form_kendaraan.dart';
 import 'widgets/header_section.dart';
 import 'widgets/scan_section.dart';
-import 'package:go_router/go_router.dart';
 
 class DashboardBinding extends Bindings {
   @override
@@ -19,6 +20,9 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Inisialisasi controller saat view ini dibuat
+    Get.put(DashboardController());
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFF1E1E3F),

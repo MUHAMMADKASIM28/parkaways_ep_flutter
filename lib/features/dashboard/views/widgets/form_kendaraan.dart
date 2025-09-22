@@ -1,3 +1,5 @@
+// lib/features/dashboard/views/widgets/form_kendaraan.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/dashboard_controllers.dart';
@@ -8,13 +10,14 @@ class FormKendaraan extends GetView<DashboardController> {
 
   @override
   Widget build(BuildContext context) {
-    // Definisikan warna baru di sini
     const Color highlightColor = Color(0xFFF5A623);
 
     return Obx(() {
       final bool isActive = controller.isTransactionActive.value;
       final Color borderColor = isActive ? Colors.white54 : Colors.white12;
       final Color plateBgColor = isActive ? Colors.transparent : Colors.white10;
+
+      final String fullPoliceNumber = '${controller.platePrefixController.text} ${controller.plateNumberController.text}'.trim();
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -24,39 +27,59 @@ class FormKendaraan extends GetView<DashboardController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: borderColor),
-                          borderRadius: BorderRadius.circular(8),
-                          color: plateBgColor,
-                        ),
-                        child: Text('DD', style: TextStyle(color: isActive ? Colors.white54 : Colors.white24, fontSize: 18)),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: TextField(
-                          controller: controller.plateNumberController,
-                          readOnly: true,
-                          style: TextStyle(color: isActive ? Colors.white : Colors.white54),
-                          decoration: InputDecoration(
-                            labelText: 'Nomor Plat',
-                            // DIUBAH: Warna label textfield
-                            labelStyle: TextStyle(color: isActive ? highlightColor : Colors.white24),
-                            filled: true,
-                            fillColor: plateBgColor,
-                            disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white12)),
-                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: borderColor)),
-                            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                  // --- Tampilan Plat Nomor Kondisional ---
+                  if (isActive)
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 80,
+                          child: TextField(
+                            controller: controller.platePrefixController,
+                            readOnly: !isActive,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: isActive ? Colors.white : Colors.white54, fontSize: 18),
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: plateBgColor,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: borderColor)),
+                              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.white)),
+                            ),
                           ),
                         ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextField(
+                            controller: controller.plateNumberController,
+                            readOnly: !isActive,
+                            style: TextStyle(color: isActive ? Colors.white : Colors.white54),
+                            decoration: InputDecoration(
+                              labelText: 'Nomor Plat',
+                              labelStyle: TextStyle(color: isActive ? highlightColor : Colors.white24),
+                              filled: true,
+                              fillColor: plateBgColor,
+                              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: borderColor)),
+                              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    TextField(
+                      controller: TextEditingController(text: fullPoliceNumber),
+                      readOnly: true,
+                      style: const TextStyle(color: Colors.white54, fontSize: 18),
+                      decoration: InputDecoration(
+                        labelText: 'Nomor Plat',
+                        labelStyle: const TextStyle(color: Colors.white24),
+                        filled: true,
+                        fillColor: Colors.white10,
+                        disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white12)),
                       ),
-                    ],
-                  ),
+                    ),
+                  
                   const SizedBox(height: 24),
-                  // DIUBAH: Warna teks jenis kendaraan
                   Text('Jenis Kendaraan', style: TextStyle(color: isActive ? highlightColor : Colors.white54, fontSize: 16)),
                   const SizedBox(height: 12),
                   GridView.count(
@@ -67,10 +90,30 @@ class FormKendaraan extends GetView<DashboardController> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
-                      VehicleButton(label: 'Motor', isSelected: controller.selectedVehicle.value == 'Motor', onTap: null, isActive: isActive),
-                      VehicleButton(label: 'Mobil', isSelected: controller.selectedVehicle.value == 'Mobil', onTap: null, isActive: isActive),
-                      VehicleButton(label: 'Motor - No Bill', isSelected: controller.selectedVehicle.value == 'Motor - No Bill', onTap: null, isActive: isActive),
-                      VehicleButton(label: 'Mobil - No Bill', isSelected: controller.selectedVehicle.value == 'Mobil - No Bill', onTap: null, isActive: isActive),
+                      VehicleButton(
+                        label: 'Motor',
+                        isSelected: controller.selectedVehicleId.value == 1,
+                        onTap: () => controller.changeVehicle(1),
+                        isActive: isActive,
+                      ),
+                      VehicleButton(
+                        label: 'Mobil',
+                        isSelected: controller.selectedVehicleId.value == 2,
+                        onTap: () => controller.changeVehicle(2),
+                        isActive: isActive,
+                      ),
+                      VehicleButton(
+                        label: 'Motor - No Bill',
+                        isSelected: controller.selectedVehicleId.value == 3,
+                        onTap: () => controller.changeVehicle(3),
+                        isActive: isActive,
+                      ),
+                      VehicleButton(
+                        label: 'Mobil - No Bill',
+                        isSelected: controller.selectedVehicleId.value == 4,
+                        onTap: () => controller.changeVehicle(4),
+                        isActive: isActive,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -79,9 +122,8 @@ class FormKendaraan extends GetView<DashboardController> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // DIUBAH: Warna teks total
                       Text('Total (Rp)', style: TextStyle(color: isActive ? highlightColor : Colors.white38, fontSize: 18)),
-                      Text('Rp. ${AppFormatters.currency.format(controller.total.value)}', style: TextStyle(color: isActive ? Colors.white : Colors.white54, fontSize: 28, fontWeight: FontWeight.bold)),
+                      Text(controller.formattedTotal, style: TextStyle(color: isActive ? Colors.white : Colors.white54, fontSize: 28, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ],
@@ -102,7 +144,6 @@ class FormKendaraan extends GetView<DashboardController> {
   }
 }
 
-// ... (Class VehicleButton tidak berubah)
 class VehicleButton extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -113,7 +154,7 @@ class VehicleButton extends StatelessWidget {
     super.key,
     required this.label,
     required this.isSelected,
-    required this.onTap,
+    this.onTap,
     required this.isActive,
   });
 
@@ -125,7 +166,7 @@ class VehicleButton extends StatelessWidget {
     final Color textColor = isActive ? Colors.white : Colors.white38;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: isActive ? onTap : null,
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(

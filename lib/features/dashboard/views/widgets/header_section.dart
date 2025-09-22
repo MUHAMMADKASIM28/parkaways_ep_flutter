@@ -1,3 +1,5 @@
+// lib/features/dashboard/views/widgets/header_section.dart
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,7 +8,6 @@ class HeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Definisikan warna baru di sini
     const Color highlightColor = Color(0xFFF5A623);
 
     return Container(
@@ -44,7 +45,6 @@ class HeaderSection extends StatelessWidget {
               const Text('Selamat Bekerja\nkasir_1', textAlign: TextAlign.right, style: TextStyle(color: Colors.white70)),
               const SizedBox(width: 16),
               IconButton(
-                // DIUBAH: Warna ikon
                 icon: const Icon(Icons.settings, color: highlightColor, size: 28),
                 onPressed: () {
                   context.go('/settings');

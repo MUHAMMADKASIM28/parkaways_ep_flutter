@@ -2,7 +2,7 @@ class LostTicketModel {
   String customerName;
   String phoneNumber;
   String idNumber;
-  String postalCode;
+  String platCode;
   String licensePlate;
   String? vehicleType;
   int totalFee;
@@ -11,11 +11,9 @@ class LostTicketModel {
     this.customerName = '',
     this.phoneNumber = '',
     this.idNumber = '',
-    this.postalCode = '',
+    this.platCode = '',
     this.licensePlate = '',
     this.vehicleType,
     this.totalFee = 0,
   });
-
-  set platCode(String platCode) {}
 }

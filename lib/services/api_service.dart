@@ -1,43 +1,162 @@
 // lib/services/api_service.dart
 
 import 'dart:convert';
+import 'dart:io';
+import 'dart:async';
 import 'package:http/http.dart' as http;
+import '../features/login/models/login_models.dart';
+import '../features/dashboard/models/transaction_model.dart';
+
+class ApiException implements Exception {
+  final String message;
+  ApiException(this.message);
+
+  @override
+  String toString() => message;
+}
 
 class ApiService {
-  // GANTI DENGAN ALAMAT IP SERVER ANDA
-  // Pilih salah satu dan hapus komentar, sesuaikan dengan kebutuhan.
+  final String baseUrl;
 
-  // 1. Jika server ada di internet (production)
-  static const String _baseUrl = 'http://203.0.113.55/api'; // <-- Ganti IP publik server
+  ApiService({required String ipServer}) : baseUrl = 'http://$ipServer:82/api';
 
-  // 2. Jika server berjalan di komputer yang sama dengan Android Emulator
-  // static const String _baseUrl = 'http://10.0.2.2:8000/api'; // Port 8000 adalah contoh
-
-  // 3. Jika server di komputer yang sama & tes di HP fisik (terhubung ke WiFi yang sama)
-  // static const String _baseUrl = 'http://192.168.1.10/api'; // <-- Ganti IP lokal komputer
-
-  /// Mengambil detail tiket dari server berdasarkan kode tiket.
-  Future<Map<String, dynamic>> getTicketDetails(String ticketCode) async {
+  Future<Map<String, dynamic>> _post(String endpoint, Map<String, dynamic> body) async {
     try {
-      final uri = Uri.parse('$_baseUrl/tickets/$ticketCode');
+      final uri = Uri.parse('$baseUrl/$endpoint');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 10));
 
-      // Kirim permintaan GET ke server, dengan batas waktu 5 detik
-      final response = await http.get(uri).timeout(const Duration(seconds: 5));
+      final responseBody = jsonDecode(response.body);
 
-      if (response.statusCode == 200) {
-        // Jika berhasil (kode 200 OK), decode response body dari JSON ke Map
-        return jsonDecode(response.body);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return responseBody;
       } else {
-        // Jika server merespons dengan error (misal: 404 Not Found)
-        throw Exception('Tiket tidak ditemukan atau server error. Status: ${response.statusCode}');
+        String errorMessage = responseBody['message'] ?? 'Terjadi kesalahan pada server.';
+        throw ApiException('Error ${response.statusCode}: $errorMessage');
       }
+    } on SocketException {
+      throw ApiException('Tidak dapat terhubung ke server. Periksa koneksi dan IP Server.');
+    } on TimeoutException {
+      throw ApiException('Koneksi ke server timeout. Mohon coba lagi.');
     } catch (e) {
-      // Menangani semua jenis error (koneksi, timeout, format, dll)
-      throw Exception('Gagal terhubung ke server: ${e.toString()}');
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
     }
   }
 
-// Anda bisa menambahkan fungsi lain di sini, misalnya:
-// Future<void> postLostTicket(Map<String, dynamic> data) async { ... }
-// Future<bool> loginUser(String username, String password) async { ... }
+  Future<LoginResponse> loginCashier({required String username, required String password}) async {
+    final body = {
+      'username': username,
+      'password': password,
+    };
+    final jsonResponse = await _post('login/cashier', body);
+    return LoginResponse.fromJson(jsonResponse);
+  }
+
+  Future<TransactionModel> checkTransaction({required String transactionCode}) async {
+    final body = {
+      'transaction_code': transactionCode,
+    };
+    
+    try {
+      final uri = Uri.parse('$baseUrl/cektransaction');
+      final response = await http.put(
+        uri,
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 10));
+      
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return TransactionModel.fromJson(responseBody);
+      } else {
+        String errorMessage = responseBody['message'] ?? 'Terjadi kesalahan pada server.';
+        throw ApiException('Error ${response.statusCode}: $errorMessage');
+      }
+    } on SocketException {
+      throw ApiException('Tidak dapat terhubung ke server. Periksa koneksi dan IP Server.');
+    } on TimeoutException {
+      throw ApiException('Koneksi ke server timeout. Mohon coba lagi.');
+    } catch (e) {
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  Future<Map<String, dynamic>> checkPrice({required String transactionCode, required int vehicleId, required String policeNumber}) async {
+    final body = {
+      'transaction_code': transactionCode,
+      'vehicle_id': vehicleId,
+      'police_number': policeNumber,
+    };
+    return await _post('cekprice', body);
+  }
+
+  /// **Endpoint: UPDATE PEMBAYARAN (MENGGUNAKAN PUT)**
+  Future<Map<String, dynamic>> updatePayment({
+    required String transactionCode,
+    required String policeNumber,
+    required int shift,
+    required int total,
+    required int adminId,
+    required String paymentType,
+    required int vehicleId, // <-- BARU: Tambahkan parameter ini
+  }) async {
+    final body = {
+      'transaction_code': transactionCode,
+      'police_number': policeNumber,
+      'shift': shift,
+      'total': total,
+      'admin_id': adminId,
+      'payment_type': paymentType,
+      'vehicle_id': vehicleId, // <-- BARU: Tambahkan field ini ke body
+    };
+    
+    try {
+      final uri = Uri.parse('$baseUrl/pepupdatepaymenttab');
+      final response = await http.put(
+        uri,
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 10));
+      
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return responseBody;
+      } else {
+        String errorMessage = responseBody['message'] ?? 'Terjadi kesalahan pada server.';
+        throw ApiException('Error ${response.statusCode}: $errorMessage');
+      }
+    } on SocketException {
+      throw ApiException('Tidak dapat terhubung ke server. Periksa koneksi dan IP Server.');
+    } on TimeoutException {
+      throw ApiException('Koneksi ke server timeout. Mohon coba lagi.');
+    } catch (e) {
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  Future<Map<String, dynamic>> processLostTicket({
+    required int vehicleId,
+    required String policeNumber,
+    required int userId,
+    required int shift,
+    required String name,
+    required String phone,
+    required String ktp,
+  }) async {
+    final body = {
+      'vehicle_id': vehicleId,
+      'police_number': policeNumber,
+      'user_id': userId,
+      'shift': shift,
+      'name': name,
+      'phone': phone,
+      'ktp': ktp,
+    };
+    return await _post('peplost', body);
+  }
 }

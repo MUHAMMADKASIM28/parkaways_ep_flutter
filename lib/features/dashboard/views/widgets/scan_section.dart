@@ -1,3 +1,5 @@
+// lib/features/dashboard/views/widgets/scan_section.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -31,11 +33,7 @@ class ScanSection extends GetView<DashboardController> {
                               controller: controller.cameraController,
                               onDetect: controller.onQrCodeDetected,
                             ),
-                            Container(
-                              width: double.infinity,
-                              height: 2,
-                              color: Colors.red,
-                            ),
+                            Container(width: double.infinity, height: 2, color: Colors.red),
                           ],
                         ),
                       ),
@@ -47,12 +45,7 @@ class ScanSection extends GetView<DashboardController> {
                         ? 'Scan tiket di area scanner'
                         : 'Hasil Scan: ${controller.scannedCode.value}',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: controller.scannedCode.value.isEmpty
-                          ? Color(0xFFF5A623)
-                          : Color(0xFFF5A623),
-                      fontSize: 16,
-                    ),
+                    style: const TextStyle(color: Color(0xFFF5A623), fontSize: 16),
                   )),
                   const SizedBox(height: 24),
                   TextField(
@@ -64,8 +57,7 @@ class ScanSection extends GetView<DashboardController> {
                       hintStyle: const TextStyle(color: Colors.white54),
                       filled: true,
                       fillColor: const Color(0xFF2C2F48),
-                      contentPadding:
-                      const EdgeInsets.symmetric(vertical: 16.0),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(color: Colors.white54),
@@ -75,9 +67,7 @@ class ScanSection extends GetView<DashboardController> {
                         borderSide: const BorderSide(color: Colors.yellow),
                       ),
                     ),
-                    onSubmitted: (value) {
-                      controller.processTicketCode(value);
-                    },
+                    onSubmitted: (_) => controller.prosesTransaksi(),
                   ),
                 ],
               ),
@@ -89,8 +79,7 @@ class ScanSection extends GetView<DashboardController> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFF5A623),
               padding: const EdgeInsets.symmetric(vertical: 20),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             child: const Text('PROSES TRANSAKSI',
                 style: TextStyle(

@@ -1,7 +1,6 @@
 // lib/services/printer_service.dart
 
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../features/dashboard/models/dashboard_models.dart';
 
