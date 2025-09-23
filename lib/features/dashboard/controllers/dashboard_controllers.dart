@@ -7,22 +7,19 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../models/transaction_model.dart';
 import '../../../services/api_service.dart';
 import '../../../services/printer_service.dart';
-import '../../../services/secure_storage_service.dart'; // Impor secure storage
+import '../../../services/secure_storage_service.dart';
 import '../models/dashboard_models.dart';
 
 class DashboardController extends GetxController {
-  // --- Inisialisasi Service ---
   final SecureStorageService _storageService = SecureStorageService();
   final PrinterService _printerService = PrinterService();
   late ApiService _apiService;
 
-  // --- Controller UI ---
   final MobileScannerController cameraController = MobileScannerController();
   final TextEditingController platePrefixController = TextEditingController();
   final TextEditingController plateNumberController = TextEditingController();
   final TextEditingController manualTicketController = TextEditingController();
 
-  // --- State UI & Data ---
   var isTransactionActive = false.obs;
   var vehicleImageUrl = ''.obs;
   var scannedCode = ''.obs;
@@ -32,9 +29,8 @@ class DashboardController extends GetxController {
   var waktuScan = "0000-00-00 00:00:00".obs;
   var durasi = "-".obs;
   var currentTransaction = Rxn<TransactionModel>();
+  var username = 'kasir_1'.obs;
 
-  // Variabel untuk menyimpan data sesi
-  String _username = 'kasir_1';
   int _shift = 1;
   int _adminId = 0;
   bool _isInitialized = false;
@@ -47,21 +43,19 @@ class DashboardController extends GetxController {
 
   Future<void> _initializeController() async {
     final ipServer = await _storageService.read('ipServer');
-    _apiService = ApiService(ipServer: ipServer ?? '192.168.18.151');
+    _apiService = ApiService(ipServer: ipServer ?? '192.168.1.1'); // Fallback IP
 
-    _username = await _storageService.read('username') ?? 'kasir_1';
+    username.value = await _storageService.read('username') ?? 'kasir_1';
     final shiftStr = await _storageService.read('shift');
     if (shiftStr != null) {
-      // Ekstrak angka dari string shift (misal: "shift1" -> 1)
       _shift = int.tryParse(shiftStr.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1;
     }
     final adminIdStr = await _storageService.read('userId');
     _adminId = int.tryParse(adminIdStr ?? '0') ?? 0;
 
-    // Set kode plat default dari storage
     platePrefixController.text = await _storageService.read('locationCode') ?? 'DD';
     _isInitialized = true;
-    update(); // Memaksa update UI jika diperlukan
+    update();
   }
 
   String get formattedTotal {
@@ -222,8 +216,7 @@ class DashboardController extends GetxController {
           totalCost: total.value
       );
 
-      // Gunakan username yang sudah login untuk nama kasir
-      await _printerService.printReceipt(printData, total.value, _username);
+      await _printerService.printReceipt(printData, total.value, username.value);
       clearTransaction();
       Get.snackbar('Selesai', 'Transaksi berhasil dan struk tercetak.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green, colorText: Colors.white);
 

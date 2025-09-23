@@ -2,92 +2,95 @@
 
 import 'package:flutter/material.dart';
 import '../models/tiket_hilang_models.dart';
-import '../../../services/api_service.dart'; // BARU: Impor ApiService
+import '../../../services/api_service.dart';
+import '../../../services/secure_storage_service.dart'; // Impor secure storage
 
 class LostTicketController {
-  // --- DIUBAH: Inisialisasi Service ---
-  // TODO: Ganti IP hardcoded ini dengan IP yang disimpan dari halaman login
-  final ApiService _apiService = ApiService(ipServer: '192.1.18.151');
+  // --- PERUBAHAN DI SINI ---
+  final SecureStorageService _storageService = SecureStorageService();
+  late ApiService _apiService;
+  // --- AKHIR PERUBAHAN ---
+
   var ticket = LostTicketModel();
 
-  // Controller UI (Tetap Sama)
   final customerNameController = TextEditingController();
   final phoneController = TextEditingController();
   final idNumberController = TextEditingController();
   final platCodeController = TextEditingController();
   final licensePlateController = TextEditingController();
 
+  // --- PERUBAHAN DI SINI ---
+  LostTicketController() {
+    _initializeController();
+  }
+
+  Future<void> _initializeController() async {
+    final ipServer = await _storageService.read('ipServer');
+    _apiService = ApiService(ipServer: ipServer ?? '192.168.1.1'); // Fallback IP
+  }
+  // --- AKHIR PERUBAHAN ---
+
   void selectVehicle(String vehicleName) {
     ticket.vehicleType = vehicleName;
 
-    // Logika biaya denda tetap di sisi klien untuk ditampilkan di UI
-    // Nilai ini tidak dikirim ke server, server akan menghitungnya sendiri
     if (vehicleName == 'Motor') {
-      ticket.totalFee = 20000;
-    } else if (vehicleName.contains('Mobil')) { // Dibuat lebih fleksibel
       ticket.totalFee = 24000;
+    } else if (vehicleName == 'Mobil') {
+      ticket.totalFee = 20000;
     } else {
       ticket.totalFee = 0;
     }
   }
 
-  // --- DIUBAH: Fungsi saveTicket sekarang async dan memanggil API ---
   Future<String?> saveTicket() async {
-    // Mengambil data dari form (Tetap Sama)
     ticket.customerName = customerNameController.text;
     ticket.phoneNumber = phoneController.text;
     ticket.idNumber = idNumberController.text;
     ticket.platCode = platCodeController.text;
     ticket.licensePlate = licensePlateController.text;
 
-    // Logika Validasi (Tetap Sama)
     if (ticket.customerName.isEmpty || ticket.licensePlate.isEmpty || ticket.vehicleType == null) {
       return 'Data tidak lengkap! Mohon isi Nama, No. Plat, dan Jenis Kendaraan.';
     }
 
-    // --- BARU: Logika untuk memanggil API /peplost ---
     try {
-      // TODO: Ganti shift dan userId dengan data yang disimpan saat login
-      const int currentShift = 1;
-      const int userId = 3; // Contoh ID dari API login
+      // Ambil shift dan userId dari storage
+      final shiftStr = await _storageService.read('shift');
+      final userIdStr = await _storageService.read('userId');
 
-      // Mapping nama kendaraan dari UI ke vehicle_id untuk API
+      final int currentShift = int.tryParse(shiftStr?.replaceAll(RegExp(r'[^0-9]'), '') ?? '1') ?? 1;
+      final int userId = int.tryParse(userIdStr ?? '0') ?? 0;
+
       int vehicleId;
       switch (ticket.vehicleType) {
         case 'Motor':
           vehicleId = 1;
           break;
         case 'Mobil':
-          vehicleId = 2; // Asumsi 'Mobil' standar adalah ID 2
+          vehicleId = 2;
           break;
-        // TODO: Tambahkan case untuk 'Mobil A', 'Mobil B' jika ID-nya berbeda
         default:
-          vehicleId = 0; // ID default jika tidak cocok
+          vehicleId = 0;
       }
 
-      // 1. Panggil fungsi processLostTicket dari ApiService
       await _apiService.processLostTicket(
         vehicleId: vehicleId,
         policeNumber: '${ticket.platCode} ${ticket.licensePlate}',
         userId: userId,
         shift: currentShift,
         name: ticket.customerName,
-        phone: ticket.phoneNumber.isEmpty ? "-" : ticket.phoneNumber, // Beri nilai default jika kosong
-        ktp: ticket.idNumber.isEmpty ? "-" : ticket.idNumber, // Beri nilai default jika kosong
+        phone: ticket.phoneNumber.isEmpty ? "-" : ticket.phoneNumber,
+        ktp: ticket.idNumber.isEmpty ? "-" : ticket.idNumber,
       );
 
-      // 2. Jika panggilan API berhasil tanpa error, kembalikan null
       print("VALIDASI BERHASIL: Data Tiket Hilang Dikirim ke Server!");
       return null;
 
     } on ApiException catch (e) {
-      // 3. Jika ApiService melempar error, kembalikan pesan errornya
       return e.toString();
     } catch (e) {
-      // Tangani error tak terduga lainnya
       return "Terjadi kesalahan tidak dikenal: ${e.toString()}";
     }
-    // --- AKHIR DARI LOGIKA API ---
   }
 
   void clearForm() {
@@ -96,7 +99,6 @@ class LostTicketController {
     idNumberController.clear();
     platCodeController.clear();
     licensePlateController.clear();
-    // Reset model ke kondisi awal
     ticket = LostTicketModel();
   }
 

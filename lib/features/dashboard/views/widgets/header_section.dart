@@ -1,9 +1,13 @@
 // lib/features/dashboard/views/widgets/header_section.dart
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart'; // Impor GetX
 import 'package:go_router/go_router.dart';
+import '../../controllers/dashboard_controllers.dart'; // Impor controller
 
-class HeaderSection extends StatelessWidget {
+// --- PERUBAHAN DI SINI ---
+class HeaderSection extends GetView<DashboardController> {
+// --- AKHIR PERUBAHAN ---
   const HeaderSection({super.key});
 
   @override
@@ -42,7 +46,13 @@ class HeaderSection extends StatelessWidget {
                 child: const Text('TIKET HILANG', style: TextStyle(color: Colors.white)),
               ),
               const SizedBox(width: 24),
-              const Text('Selamat Bekerja\nkasir_1', textAlign: TextAlign.right, style: TextStyle(color: Colors.white70)),
+              // --- PERUBAHAN DI SINI ---
+              Obx(() => Text(
+                  'Selamat Bekerja\n${controller.username.value}', // Ambil username dari controller
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(color: Colors.white70)
+              )),
+              // --- AKHIR PERUBAHAN ---
               const SizedBox(width: 16),
               IconButton(
                 icon: const Icon(Icons.settings, color: highlightColor, size: 28),
