@@ -29,10 +29,16 @@ class ScanSection extends GetView<DashboardController> {
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            MobileScanner(
-                              controller: controller.cameraController,
-                              onDetect: controller.onQrCodeDetected,
+                            // --- PERUBAHAN DI SINI ---
+                            // Bungkus MobileScanner dengan RotatedBox
+                            RotatedBox(
+                              quarterTurns: -1, // -1 untuk putar 90 derajat ke kiri
+                              child: MobileScanner(
+                                controller: controller.cameraController,
+                                onDetect: controller.onQrCodeDetected,
+                              ),
                             ),
+                            // --- AKHIR PERUBAHAN ---
                             Container(width: double.infinity, height: 2, color: Colors.red),
                           ],
                         ),

@@ -18,7 +18,7 @@ class ApiException implements Exception {
 class ApiService {
   final String baseUrl;
 
-  ApiService({required String ipServer}) : baseUrl = 'http://$ipServer:82/api';
+  ApiService({required String ipServer}) : baseUrl = 'http://$ipServer/api';
 
   Future<Map<String, dynamic>> _post(String endpoint, Map<String, dynamic> body) async {
     try {

@@ -1,61 +1,61 @@
-// features/login/controllers/login_controller.dart
+// lib/features/login/controllers/login_controller.dart
 
 import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:go_router/go_router.dart';
-import '../../../services/api_service.dart'; // BARU: Impor ApiService
+import '../../../services/api_service.dart';
+import '../../../services/secure_storage_service.dart'; // Impor secure storage service
 
 class LoginController {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController ipServerController = TextEditingController();
+  final SecureStorageService _storageService = SecureStorageService(); // Buat instance service
 
-  // DIUBAH: Fungsi login sekarang menjadi async untuk menunggu respons API
+  LoginController() {
+    _loadInitialData();
+  }
+
+  // Fungsi untuk memuat data awal
+  void _loadInitialData() async {
+    ipServerController.text = await _storageService.read('ipServer') ?? '';
+  }
+
   Future<void> login({required BuildContext context, required String? shift}) async {
     final String username = usernameController.text;
     final String password = passwordController.text;
     final String ipServer = ipServerController.text;
 
-    // Logika validasi tetap sama
     if (username.isEmpty || password.isEmpty || ipServer.isEmpty || shift == null) {
       _showErrorFlushbar(context, "Mohon lengkapi semua kolom.");
-      return; // Hentikan fungsi jika ada field yang kosong
+      return;
     }
 
-    // --- BARU: Logika untuk memanggil API ---
     try {
-      // 1. Buat instance ApiService dengan IP yang diinput dari form
       final apiService = ApiService(ipServer: ipServer);
-
-      // 2. Panggil fungsi loginCashier dan tunggu hasilnya
       final response = await apiService.loginCashier(
         username: username,
         password: password,
       );
 
-      // 3. Cek apakah respons dari API sukses
       if (response.status == "Sukses Login" && response.userId > 0) {
-        // Jika berhasil:
-        // TODO: Simpan data penting (ipServer, response.userId, shift)
-        // ke local storage agar bisa diakses di halaman lain.
+        // Simpan data ke secure storage
+        await _storageService.write('ipServer', ipServer);
+        await _storageService.write('userId', response.userId.toString());
+        await _storageService.write('shift', shift);
+        await _storageService.write('username', username);
 
-        // Pindah ke halaman dashboard
         context.go('/dashboard');
       } else {
-        // Jika API mengembalikan status gagal
         _showErrorFlushbar(context, response.status);
       }
     } on ApiException catch (e) {
-      // 4. Tangani error spesifik dari ApiService (koneksi, timeout, dll)
       _showErrorFlushbar(context, e.toString());
     } catch (e) {
-      // Tangani error tak terduga lainnya
       _showErrorFlushbar(context, "Terjadi kesalahan tidak dikenal: ${e.toString()}");
     }
-    // --- AKHIR DARI LOGIKA API ---
   }
 
-  // Helper widget untuk menampilkan notifikasi error secara konsisten
   void _showErrorFlushbar(BuildContext context, String message) {
     Flushbar(
       flushbarPosition: FlushbarPosition.TOP,
@@ -81,7 +81,7 @@ class LoginController {
         message,
         style: TextStyle(fontSize: 16.0, color: Colors.white),
       ),
-      duration: const Duration(seconds: 4), // Perpanjang durasi agar mudah dibaca
+      duration: const Duration(seconds: 4),
       borderRadius: BorderRadius.circular(8),
       margin: const EdgeInsets.all(8),
     ).show(context);
