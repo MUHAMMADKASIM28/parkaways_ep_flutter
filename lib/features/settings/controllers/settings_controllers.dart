@@ -1,17 +1,17 @@
-// lib/features/settings/controllers/settings_controller.dart
+// lib/features/settings/controllers/settings_controllers.dart
 
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import '../models/settings_models.dart';
-import '../../../services/secure_storage_service.dart'; // Impor secure storage service
+import '../../../services/secure_storage_service.dart';
 
 class SettingsController {
   var settings = SettingsModel();
   late TextEditingController locationCodeController;
   late TextEditingController ipServerController;
-  final SecureStorageService _storageService = SecureStorageService(); // Buat instance service
+  final SecureStorageService _storageService = SecureStorageService();
 
   SettingsController() {
     locationCodeController = TextEditingController();
@@ -19,7 +19,6 @@ class SettingsController {
     _loadSettings();
   }
 
-  // Fungsi untuk memuat pengaturan dari storage
   Future<void> _loadSettings() async {
     settings.selectedPrinterName = await _storageService.read('printerName') ?? '';
     settings.selectedPrinterAddress = await _storageService.read('printerAddress') ?? '';
@@ -35,7 +34,6 @@ class SettingsController {
     settings.selectedPrinterName = device.name ?? 'Unknown Device';
     settings.selectedPrinterAddress = device.address ?? '';
 
-    // Simpan data printer
     await _storageService.write('printerName', settings.selectedPrinterName);
     await _storageService.write('printerAddress', settings.selectedPrinterAddress);
 
@@ -60,13 +58,21 @@ class SettingsController {
     Fluttertoast.showToast(msg: 'IP Server berhasil disimpan!');
   }
 
+  // --- PERUBAHAN FUNGSI LOGOUT DI SINI ---
   void endSession(BuildContext context) async {
-    // Hapus data sesi dari storage
+    // Menghapus semua data sesi dan pengaturan
     await _storageService.delete('userId');
     await _storageService.delete('shift');
     await _storageService.delete('username');
+    await _storageService.delete('ipServer');
+    await _storageService.delete('printerName');
+    await _storageService.delete('printerAddress');
+    await _storageService.delete('locationCode');
+
+    // Kembali ke halaman login
     context.go('/login');
   }
+  // --- AKHIR PERUBAHAN ---
 
   void dispose() {
     locationCodeController.dispose();

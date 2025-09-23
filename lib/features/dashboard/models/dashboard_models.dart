@@ -1,4 +1,7 @@
+// lib/features/dashboard/models/dashboard_models.dart
+
 class TransactionData {
+  final String transactionCode; // <-- TAMBAHKAN BARIS INI
   final String plateNumber;
   final String vehicleType;
   final DateTime entryTime;
@@ -6,6 +9,7 @@ class TransactionData {
   final int totalCost;
 
   TransactionData({
+    required this.transactionCode, // <-- TAMBAHKAN BARIS INI
     required this.plateNumber,
     required this.vehicleType,
     required this.entryTime,

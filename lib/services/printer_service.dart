@@ -14,31 +14,39 @@ class PrinterService {
       throw Exception('Printer tidak terhubung. Silakan atur di halaman Settings.');
     }
 
-    // Siapkan data struk
-    final dateFormat = DateFormat('dd/MM/yyyy HH:mm:ss');
-    final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    // --- PERUBAHAN FORMAT DAN PERATAAN DI SINI ---
 
-    // Cetak header
-    await _printer.printCustom("PARKWAYS EXPRESS PAYMENT", 2, 1); // Teks, Ukuran, Align
-    await _printer.printCustom("BSS Office", 1, 1);
+    // Siapkan data struk sesuai format baru
+    final firstLine = "BSS Office";
+    // Gunakan kode tiket dari objek 'data'
+    final secondLine = "${data.transactionCode} * ${DateFormat('yyyy-MM-dd HH:mm:ss').format(data.scanTime)}";
+    final thirdLine = "${data.vehicleType} * ${total.toString()} * ${kasir}";
+    final fourthLine = "Struk ini merupakan bukti";
+    final fifthLine = "pembayaran yang sah.";
+    final sixthLine = "------- www.parkways.id -------";
+
+    // Mengatur perataan dan ukuran font
+    // Ukuran: 0 (kecil), 1 (sedang), 2 (besar)
+    // Perataan: 0 (kiri), 1 (tengah), 2 (kanan)
+    const int size = 1;     // Ukuran font sedang
+    const int align = 1;    // Perataan tengah
+
+    // Cetak setiap baris
+    await _printer.printCustom(firstLine, size, align);
+    await _printer.printNewLine(); // Beri spasi satu baris
+    await _printer.printCustom(secondLine, size, align);
+    await _printer.printCustom(thirdLine, size, align);
+    await _printer.printNewLine(); // Beri spasi satu baris
+    await _printer.printCustom(fourthLine, size, align);
+    await _printer.printCustom(fifthLine, size, align);
+    await _printer.printNewLine(); // Beri spasi satu baris
+    await _printer.printCustom(sixthLine, size, align);
+
+    // Beri beberapa baris kosong di akhir untuk memudahkan penyobekan
     await _printer.printNewLine();
 
-    // Cetak detail transaksi
-    await _printer.printLeftRight("Kasir", kasir, 1);
-    await _printer.printLeftRight("Plat Nomor", data.plateNumber, 1);
-    await _printer.printLeftRight("Jenis", data.vehicleType, 1);
-    await _printer.printLeftRight("Waktu Masuk", dateFormat.format(data.entryTime), 1);
-    await _printer.printLeftRight("Waktu Keluar", dateFormat.format(data.scanTime), 1);
-    await _printer.printCustom("--------------------------------", 1, 1);
-
-    // Cetak Total
-    await _printer.printLeftRight("TOTAL", currencyFormat.format(total), 2);
-    await _printer.printCustom("--------------------------------", 1, 1);
-    await _printer.printNewLine();
-
-    // Cetak footer
-    await _printer.printCustom("Terima Kasih", 1, 1);
-    await _printer.printCustom("Selamat Jalan Kembali", 1, 1);
-    await _printer.paperCut(); // Potong kertas (jika didukung)
+    // Potong kertas (jika printer mendukung)
+    await _printer.paperCut();
+    // --- AKHIR PERUBAHAN ---
   }
 }

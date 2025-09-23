@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../models/transaction_model.dart';
 import '../../../services/api_service.dart';
 import '../../../services/printer_service.dart';
@@ -13,6 +15,7 @@ import '../models/dashboard_models.dart';
 class DashboardController extends GetxController {
   final SecureStorageService _storageService = SecureStorageService();
   final PrinterService _printerService = PrinterService();
+  final BlueThermalPrinter _printer = BlueThermalPrinter.instance;
   late ApiService _apiService;
 
   final MobileScannerController cameraController = MobileScannerController();
@@ -43,7 +46,7 @@ class DashboardController extends GetxController {
 
   Future<void> _initializeController() async {
     final ipServer = await _storageService.read('ipServer');
-    _apiService = ApiService(ipServer: ipServer ?? '192.168.1.1'); // Fallback IP
+    _apiService = ApiService(ipServer: ipServer ?? '192.168.1.1');
 
     username.value = await _storageService.read('username') ?? 'kasir_1';
     final shiftStr = await _storageService.read('shift');
@@ -53,9 +56,31 @@ class DashboardController extends GetxController {
     final adminIdStr = await _storageService.read('userId');
     _adminId = int.tryParse(adminIdStr ?? '0') ?? 0;
 
-    platePrefixController.text = await _storageService.read('locationCode') ?? 'DD';
+    // Tidak perlu set platePrefixController di sini lagi
+    await _autoConnectPrinter();
+
     _isInitialized = true;
     update();
+  }
+
+  Future<void> _autoConnectPrinter() async {
+    try {
+      final String? printerAddress = await _storageService.read('printerAddress');
+      final String? printerName = await _storageService.read('printerName');
+
+      if (printerAddress != null && printerAddress.isNotEmpty) {
+        BluetoothDevice device = BluetoothDevice(printerName, printerAddress);
+        bool? isConnected = await _printer.isConnected;
+        if (isConnected != true) {
+          await _printer.connect(device);
+        }
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Gagal menyambung ulang ke printer.",
+        backgroundColor: Colors.orangeAccent,
+      );
+    }
   }
 
   String get formattedTotal {
@@ -108,10 +133,16 @@ class DashboardController extends GetxController {
           platePrefixController.text = parts.first;
           plateNumberController.text = parts.sublist(1).join(" ");
         } else {
-          final defaultPrefix = await _storageService.read('locationCode') ?? 'DD';
-          platePrefixController.text = defaultPrefix;
+          // --- PERUBAHAN DI SINI ---
+          // Set kode plat hanya jika transaksi aktif (belum dibayar)
+          if (transactionResult.status == "success") {
+            platePrefixController.text = await _storageService.read('locationCode') ?? '';
+          } else {
+            platePrefixController.text = ''; // Kosongkan jika sudah dibayar
+          }
           plateNumberController.text = policeNumberFromApi == "-" ? "" : policeNumberFromApi;
         }
+        // --- AKHIR PERUBAHAN ---
 
         final int vehicleIdFromApi = int.tryParse(transactionResult.vehicleId) ?? 0;
         selectedVehicleId.value = vehicleIdFromApi;
@@ -162,9 +193,10 @@ class DashboardController extends GetxController {
     calculateTotal();
   }
 
+  // --- PERUBAHAN DI SINI ---
   void clearTransaction() async {
     scannedCode.value = '';
-    platePrefixController.text = await _storageService.read('locationCode') ?? 'DD';
+    platePrefixController.clear(); // Hapus clearTransaction yang lama
     plateNumberController.clear();
     manualTicketController.clear();
     selectedVehicleId.value = 0;
@@ -176,6 +208,7 @@ class DashboardController extends GetxController {
     isTransactionActive.value = false;
     vehicleImageUrl.value = '';
   }
+  // --- AKHIR PERUBAHAN ---
 
   Future<void> _handlePayment(String paymentType) async {
     if (!_isInitialized || !isTransactionActive.value || currentTransaction.value == null) {
@@ -209,6 +242,7 @@ class DashboardController extends GetxController {
       );
 
       final printData = TransactionData(
+          transactionCode: currentTransaction.value!.transactionCode,
           plateNumber: fullPoliceNumber.trim(),
           vehicleType: selectedVehicleId.value == 1 ? "Motor" : "Mobil",
           entryTime: DateFormat('yyyy-MM-dd HH:mm:ss').parse(waktuMasuk.value),
