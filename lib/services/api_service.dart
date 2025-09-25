@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import '../features/login/models/login_models.dart';
+import '../features/login/models/location_model.dart';
 import '../features/dashboard/models/transaction_model.dart';
 
 class ApiException implements Exception {
@@ -19,6 +20,37 @@ class ApiService {
   final String baseUrl;
 
   ApiService({required String ipServer}) : baseUrl = 'http://$ipServer/api';
+
+  Future<Map<String, dynamic>> _get(String endpoint) async {
+    try {
+      final uri = Uri.parse('$baseUrl/$endpoint');
+      final response = await http.get(
+        uri,
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      ).timeout(const Duration(seconds: 10));
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return responseBody;
+      } else {
+        String errorMessage = responseBody['message'] ?? 'Terjadi kesalahan pada server.';
+        throw ApiException('Error ${response.statusCode}: $errorMessage');
+      }
+    } on SocketException {
+      throw ApiException('Tidak dapat terhubung ke server. Periksa koneksi dan IP Server.');
+    } on TimeoutException {
+      throw ApiException('Koneksi ke server timeout. Mohon coba lagi.');
+    } catch (e) {
+      throw ApiException('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
+  // --- TAMBAHKAN FUNGSI UNTUK MENGAMBIL DETAIL LOKASI ---
+  Future<Location> getLocationDetails(int locationId) async {
+    final jsonResponse = await _get('master/location/$locationId');
+    return Location.fromJson(jsonResponse);
+  }
 
   Future<Map<String, dynamic>> _post(String endpoint, Map<String, dynamic> body) async {
     try {

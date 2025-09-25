@@ -1,13 +1,11 @@
 // lib/features/dashboard/views/widgets/header_section.dart
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; // Impor GetX
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import '../../controllers/dashboard_controllers.dart'; // Impor controller
+import '../../controllers/dashboard_controllers.dart';
 
-// --- PERUBAHAN DI SINI ---
 class HeaderSection extends GetView<DashboardController> {
-// --- AKHIR PERUBAHAN ---
   const HeaderSection({super.key});
 
   @override
@@ -19,14 +17,32 @@ class HeaderSection extends GetView<DashboardController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Expanded(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Parkways Express Payment - BSS Office',
-                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+          Expanded(
+            child: Row(
+              children: [
+                // Widget untuk menampilkan logo dari aset lokal
+                Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Image.asset(
+                    'assets/icons/logo-parkways.png', // Ganti dengan path gambar lokal Anda
+                    height: 40,
+                    width: 40,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Obx(() => Text(
+                      'Parkways Express Payment - ${controller.locationName.value}',
+                      style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                      maxLines: 1,
+                    )),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 24),
@@ -46,13 +62,11 @@ class HeaderSection extends GetView<DashboardController> {
                 child: const Text('TIKET HILANG', style: TextStyle(color: Colors.white)),
               ),
               const SizedBox(width: 24),
-              // --- PERUBAHAN DI SINI ---
               Obx(() => Text(
-                  'Selamat Bekerja\n${controller.username.value}', // Ambil username dari controller
+                  'Selamat Bekerja\n${controller.username.value}',
                   textAlign: TextAlign.right,
                   style: const TextStyle(color: Colors.white70)
               )),
-              // --- AKHIR PERUBAHAN ---
               const SizedBox(width: 16),
               IconButton(
                 icon: const Icon(Icons.settings, color: highlightColor, size: 28),

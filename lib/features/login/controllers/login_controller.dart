@@ -4,19 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:go_router/go_router.dart';
 import '../../../services/api_service.dart';
-import '../../../services/secure_storage_service.dart'; // Impor secure storage service
+import '../../../services/secure_storage_service.dart';
+import '../models/location_model.dart';
 
 class LoginController {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController ipServerController = TextEditingController();
-  final SecureStorageService _storageService = SecureStorageService(); // Buat instance service
+  final SecureStorageService _storageService = SecureStorageService();
 
   LoginController() {
     _loadInitialData();
   }
 
-  // Fungsi untuk memuat data awal
   void _loadInitialData() async {
     ipServerController.text = await _storageService.read('ipServer') ?? '';
   }
@@ -33,21 +33,30 @@ class LoginController {
 
     try {
       final apiService = ApiService(ipServer: ipServer);
-      final response = await apiService.loginCashier(
+      final loginResponse = await apiService.loginCashier(
         username: username,
         password: password,
       );
 
-      if (response.status == "Sukses Login" && response.userId > 0) {
-        // Simpan data ke secure storage
+      if (loginResponse.status == "Sukses Login" && loginResponse.userId > 0) {
+        // Ambil detail lokasi dari server
+        final locationDetails = await apiService.getLocationDetails(1);
+
+        // Simpan semua data sesi dan lokasi
         await _storageService.write('ipServer', ipServer);
-        await _storageService.write('userId', response.userId.toString());
+        await _storageService.write('userId', loginResponse.userId.toString());
         await _storageService.write('shift', shift);
         await _storageService.write('username', username);
+        await _storageService.write('locationName', locationDetails.name);
+        await _storageService.write('locationImage', locationDetails.image);
+        
+        // --- PERUBAHAN DI SINI ---
+        // Simpan location_code dari API dengan kunci terpisah
+        await _storageService.write('apiLocationCode', locationDetails.locationCode);
 
         context.go('/dashboard');
       } else {
-        _showErrorFlushbar(context, response.status);
+        _showErrorFlushbar(context, loginResponse.status);
       }
     } on ApiException catch (e) {
       _showErrorFlushbar(context, e.toString());

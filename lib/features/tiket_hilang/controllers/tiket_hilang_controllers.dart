@@ -1,15 +1,17 @@
 // lib/features/tiket_hilang/controllers/tiket_hilang_controllers.dart
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import '../models/tiket_hilang_models.dart';
 import '../../../services/api_service.dart';
-import '../../../services/secure_storage_service.dart'; // Impor secure storage
+import '../../../services/secure_storage_service.dart';
+import '../../../services/printer_service.dart';
 
 class LostTicketController {
-  // --- PERUBAHAN DI SINI ---
   final SecureStorageService _storageService = SecureStorageService();
+  final PrinterService _printerService = PrinterService();
   late ApiService _apiService;
-  // --- AKHIR PERUBAHAN ---
 
   var ticket = LostTicketModel();
 
@@ -19,7 +21,6 @@ class LostTicketController {
   final platCodeController = TextEditingController();
   final licensePlateController = TextEditingController();
 
-  // --- PERUBAHAN DI SINI ---
   LostTicketController() {
     _initializeController();
   }
@@ -28,7 +29,6 @@ class LostTicketController {
     final ipServer = await _storageService.read('ipServer');
     _apiService = ApiService(ipServer: ipServer ?? '192.168.1.1'); // Fallback IP
   }
-  // --- AKHIR PERUBAHAN ---
 
   void selectVehicle(String vehicleName) {
     ticket.vehicleType = vehicleName;
@@ -49,7 +49,9 @@ class LostTicketController {
     ticket.platCode = platCodeController.text;
     ticket.licensePlate = licensePlateController.text;
 
-    if (ticket.customerName.isEmpty || ticket.licensePlate.isEmpty || ticket.vehicleType == null) {
+    if (ticket.customerName.isEmpty ||
+        ticket.licensePlate.isEmpty ||
+        ticket.vehicleType == null) {
       return 'Data tidak lengkap! Mohon isi Nama, No. Plat, dan Jenis Kendaraan.';
     }
 
@@ -58,7 +60,8 @@ class LostTicketController {
       final shiftStr = await _storageService.read('shift');
       final userIdStr = await _storageService.read('userId');
 
-      final int currentShift = int.tryParse(shiftStr?.replaceAll(RegExp(r'[^0-9]'), '') ?? '1') ?? 1;
+      final int currentShift =
+          int.tryParse(shiftStr?.replaceAll(RegExp(r'[^0-9]'), '') ?? '1') ?? 1;
       final int userId = int.tryParse(userIdStr ?? '0') ?? 0;
 
       int vehicleId;
@@ -85,13 +88,28 @@ class LostTicketController {
 
       print("VALIDASI BERHASIL: Data Tiket Hilang Dikirim ke Server!");
       return null;
-
     } on ApiException catch (e) {
       return e.toString();
     } catch (e) {
       return "Terjadi kesalahan tidak dikenal: ${e.toString()}";
     }
   }
+
+  // --- FUNGSI BARU UNTUK CETAK STRUK ---
+  Future<void> printLostTicketReceipt(BuildContext context) async {
+    try {
+      final username = await _storageService.read('username') ?? 'kasir';
+      await _printerService.printLostTicketReceipt(ticket, username);
+    } catch (e) {
+      // Cek apakah widget masih ada di tree sebelum menampilkan toast
+      if (!context.mounted) return;
+      Fluttertoast.showToast(
+        msg: "Gagal mencetak struk: ${e.toString()}",
+        backgroundColor: Colors.red,
+      );
+    }
+  }
+  // --- AKHIR PERUBAHAN ---
 
   void clearForm() {
     customerNameController.clear();

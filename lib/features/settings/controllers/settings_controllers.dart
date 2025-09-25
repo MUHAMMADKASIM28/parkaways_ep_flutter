@@ -22,6 +22,8 @@ class SettingsController {
   Future<void> _loadSettings() async {
     settings.selectedPrinterName = await _storageService.read('printerName') ?? '';
     settings.selectedPrinterAddress = await _storageService.read('printerAddress') ?? '';
+    // --- TIDAK ADA PERUBAHAN DI SINI ---
+    // Tetap memuat 'locationCode' yang diisi manual oleh pengguna
     settings.locationCode = await _storageService.read('locationCode') ?? '';
     settings.ipServer = await _storageService.read('ipServer') ?? '192.168.100.5';
     settings.username = await _storageService.read('username') ?? 'kasir_utama';
@@ -48,6 +50,8 @@ class SettingsController {
 
   void saveLocationCode() async {
     settings.locationCode = locationCodeController.text;
+    // --- TIDAK ADA PERUBAHAN DI SINI ---
+    // Tetap menyimpan 'locationCode' hasil input manual
     await _storageService.write('locationCode', settings.locationCode);
     Fluttertoast.showToast(msg: 'Kode Plat berhasil disimpan!');
   }
@@ -58,9 +62,7 @@ class SettingsController {
     Fluttertoast.showToast(msg: 'IP Server berhasil disimpan!');
   }
 
-  // --- PERUBAHAN FUNGSI LOGOUT DI SINI ---
   void endSession(BuildContext context) async {
-    // Menghapus semua data sesi dan pengaturan
     await _storageService.delete('userId');
     await _storageService.delete('shift');
     await _storageService.delete('username');
@@ -68,11 +70,12 @@ class SettingsController {
     await _storageService.delete('printerName');
     await _storageService.delete('printerAddress');
     await _storageService.delete('locationCode');
+    await _storageService.delete('locationName'); // <-- Tambahkan pembersihan data lokasi
+    await _storageService.delete('locationImage'); // <-- Tambahkan pembersihan data lokasi
+    await _storageService.delete('apiLocationCode'); // <-- Tambahkan pembersihan data lokasi
 
-    // Kembali ke halaman login
     context.go('/login');
   }
-  // --- AKHIR PERUBAHAN ---
 
   void dispose() {
     locationCodeController.dispose();

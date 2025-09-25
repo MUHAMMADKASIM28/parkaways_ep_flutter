@@ -33,6 +33,11 @@ class DashboardController extends GetxController {
   var durasi = "-".obs;
   var currentTransaction = Rxn<TransactionModel>();
   var username = 'kasir_1'.obs;
+  var locationName = 'Lokasi Parkir'.obs;
+  var locationLogoUrl = ''.obs;
+
+  // Variabel pemicu untuk menampilkan dialog di view
+  var paidTicketInfo = Rxn<Map<String, String>>();
 
   int _shift = 1;
   int _adminId = 0;
@@ -49,6 +54,14 @@ class DashboardController extends GetxController {
     _apiService = ApiService(ipServer: ipServer ?? '192.168.1.1');
 
     username.value = await _storageService.read('username') ?? 'kasir_1';
+    locationName.value = await _storageService.read('locationName') ?? 'Lokasi Parkir';
+    
+    final locationImage = await _storageService.read('locationImage') ?? '';
+    if (ipServer != null && locationImage.isNotEmpty) {
+      final baseUrl = 'http://$ipServer';
+      locationLogoUrl.value = '$baseUrl/$locationImage';
+    }
+
     final shiftStr = await _storageService.read('shift');
     if (shiftStr != null) {
       _shift = int.tryParse(shiftStr.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1;
@@ -56,7 +69,6 @@ class DashboardController extends GetxController {
     final adminIdStr = await _storageService.read('userId');
     _adminId = int.tryParse(adminIdStr ?? '0') ?? 0;
 
-    // Tidak perlu set platePrefixController di sini lagi
     await _autoConnectPrinter();
 
     _isInitialized = true;
@@ -128,21 +140,34 @@ class DashboardController extends GetxController {
         vehicleImageUrl.value = transactionResult.camIn;
 
         final String policeNumberFromApi = transactionResult.policeNumber;
-        if (policeNumberFromApi.contains(" ")) {
-          final parts = policeNumberFromApi.split(" ");
-          platePrefixController.text = parts.first;
-          plateNumberController.text = parts.sublist(1).join(" ");
+        
+        if (transactionResult.status == "sudah") {
+            final RegExp plateRegex = RegExp(r'^([A-Z]{1,2})(\d{1,4})([A-Z]{1,3})$');
+            final match = plateRegex.firstMatch(policeNumberFromApi.toUpperCase());
+
+            if (match != null) {
+                final String prefix = match.group(1)!;
+                final String numbers = match.group(2)!;
+                final String suffix = match.group(3)!;
+
+                platePrefixController.text = prefix;
+                plateNumberController.text = '$numbers $suffix';
+            } else {
+                platePrefixController.text = '';
+                plateNumberController.text = policeNumberFromApi;
+            }
+        } else if (policeNumberFromApi.contains(" ")) {
+            final parts = policeNumberFromApi.split(" ");
+            platePrefixController.text = parts.first;
+            plateNumberController.text = parts.sublist(1).join(" ");
         } else {
-          // --- PERUBAHAN DI SINI ---
-          // Set kode plat hanya jika transaksi aktif (belum dibayar)
-          if (transactionResult.status == "success") {
-            platePrefixController.text = await _storageService.read('locationCode') ?? '';
-          } else {
-            platePrefixController.text = ''; // Kosongkan jika sudah dibayar
-          }
-          plateNumberController.text = policeNumberFromApi == "-" ? "" : policeNumberFromApi;
+            if (transactionResult.status == "success") {
+                platePrefixController.text = await _storageService.read('locationCode') ?? '';
+            } else {
+                platePrefixController.text = '';
+            }
+            plateNumberController.text = policeNumberFromApi == "-" ? "" : policeNumberFromApi;
         }
-        // --- AKHIR PERUBAHAN ---
 
         final int vehicleIdFromApi = int.tryParse(transactionResult.vehicleId) ?? 0;
         selectedVehicleId.value = vehicleIdFromApi;
@@ -150,7 +175,12 @@ class DashboardController extends GetxController {
 
         if (transactionResult.status == "sudah") {
           total.value = int.tryParse(transactionResult.total) ?? 0;
-          Get.snackbar('Informasi', 'Tiket ini sudah dibayar.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.orange, colorText: Colors.white);
+          
+          // Perbarui variabel pemicu, bukan panggil dialog
+          paidTicketInfo.value = {
+            'code': transactionResult.transactionCode,
+          };
+
         } else {
           if (vehicleIdFromApi > 0) {
             await calculateTotal();
@@ -193,10 +223,9 @@ class DashboardController extends GetxController {
     calculateTotal();
   }
 
-  // --- PERUBAHAN DI SINI ---
   void clearTransaction() async {
     scannedCode.value = '';
-    platePrefixController.clear(); // Hapus clearTransaction yang lama
+    platePrefixController.clear();
     plateNumberController.clear();
     manualTicketController.clear();
     selectedVehicleId.value = 0;
@@ -208,7 +237,6 @@ class DashboardController extends GetxController {
     isTransactionActive.value = false;
     vehicleImageUrl.value = '';
   }
-  // --- AKHIR PERUBAHAN ---
 
   Future<void> _handlePayment(String paymentType) async {
     if (!_isInitialized || !isTransactionActive.value || currentTransaction.value == null) {
@@ -229,11 +257,12 @@ class DashboardController extends GetxController {
     }
 
     try {
-      final String fullPoliceNumber = '$platePrefix $plateNumber';
+      final String fullPoliceNumberForStorage = ('$platePrefix $plateNumber').replaceAll(' ', '');
+      final String fullPoliceNumberForDisplay = '$platePrefix $plateNumber'.trim();
 
       await _apiService.updatePayment(
         transactionCode: currentTransaction.value!.transactionCode,
-        policeNumber: fullPoliceNumber.trim(),
+        policeNumber: fullPoliceNumberForStorage,
         shift: _shift,
         total: total.value,
         adminId: _adminId,
@@ -243,7 +272,7 @@ class DashboardController extends GetxController {
 
       final printData = TransactionData(
           transactionCode: currentTransaction.value!.transactionCode,
-          plateNumber: fullPoliceNumber.trim(),
+          plateNumber: fullPoliceNumberForDisplay,
           vehicleType: selectedVehicleId.value == 1 ? "Motor" : "Mobil",
           entryTime: DateFormat('yyyy-MM-dd HH:mm:ss').parse(waktuMasuk.value),
           scanTime: DateFormat('yyyy-MM-dd HH:mm:ss').parse(waktuScan.value),

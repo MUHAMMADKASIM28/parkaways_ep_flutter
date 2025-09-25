@@ -15,13 +15,13 @@ class DashboardBinding extends Bindings {
   }
 }
 
-class DashboardView extends StatelessWidget {
+class DashboardView extends GetView<DashboardController> {
   const DashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Inisialisasi controller saat view ini dibuat
-    Get.put(DashboardController());
+    // Siapkan listener untuk dialog
+    _setupDialogListener(context);
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -71,5 +71,34 @@ class DashboardView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Fungsi untuk "mendengarkan" perubahan pada controller
+  void _setupDialogListener(BuildContext context) {
+    ever(controller.paidTicketInfo, (Map<String, String>? ticketInfo) {
+      if (ticketInfo != null && context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext dialogContext) {
+            return AlertDialog(
+              title: const Text('Peringatan'),
+              content: Text('Tiket dengan kode transaksi "${ticketInfo['code']}" sudah dibayar.'),
+              actions: [
+                TextButton(
+                  child: const Text("OK"),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    controller.clearTransaction();
+                    // Reset pemicu agar tidak muncul lagi
+                    controller.paidTicketInfo.value = null; 
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+    });
   }
 }

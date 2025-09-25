@@ -25,7 +25,7 @@ class _LostTicketViewState extends State<LostTicketView> {
     });
   }
 
-  // BARU: Fungsi terpisah untuk menangani logika penyimpanan
+  // FUNGSI UNTUK MENANGANI LOGIKA PENYIMPANAN
   Future<void> _saveData() async {
     // 1. Set state loading menjadi true dan rebuild UI
     setState(() {
@@ -40,11 +40,11 @@ class _LostTicketViewState extends State<LostTicketView> {
       _isLoading = false;
     });
 
-    // 4. Proses hasilnya seperti sebelumnya
+    // 4. Proses hasilnya
     if (mounted) { // Cek apakah widget masih ada di tree
       if (errorMessage != null) {
         Fluttertoast.showToast(
-          msg: errorMessage, // Sekarang ini adalah String, bukan Future
+          msg: errorMessage,
           toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.redAccent,
@@ -52,9 +52,33 @@ class _LostTicketViewState extends State<LostTicketView> {
           fontSize: 16.0,
         );
       } else {
-        Fluttertoast.showToast(msg: "Data Berhasil Disimpan!");
-        // Setelah berhasil, kembali ke dashboard
-        context.go('/dashboard');
+        // Tampilkan dialog konfirmasi setelah berhasil
+        showDialog(
+          context: context,
+          barrierDismissible: false, // Mencegah dialog ditutup dengan tap di luar
+          builder: (BuildContext dialogContext) { // Gunakan context baru untuk dialog
+            return AlertDialog(
+              title: const Text('Simpan Berhasil'),
+              content: const Text('Data tiket hilang telah berhasil disimpan. Apakah Anda ingin mencetak struk?'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Tidak'),
+                  onPressed: () {
+                    context.go('/dashboard'); // Kembali ke dashboard
+                  },
+                ),
+                TextButton(
+                  child: const Text('Ya, Cetak'),
+                  onPressed: () {
+                    // Kirim 'context' dari view ke controller
+                    _controller.printLostTicketReceipt(context);
+                    context.go('/dashboard'); // Kembali ke dashboard
+                  },
+                ),
+              ],
+            );
+          },
+        );
       }
     }
   }
@@ -141,7 +165,7 @@ class _LostTicketViewState extends State<LostTicketView> {
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
-                  // DIUBAH: Panggil fungsi _saveData yang sudah async
+                  // Panggil fungsi _saveData yang sudah async
                   // Nonaktifkan tombol jika sedang loading
                   onPressed: _isLoading ? null : _saveData,
                   style: ElevatedButton.styleFrom(
