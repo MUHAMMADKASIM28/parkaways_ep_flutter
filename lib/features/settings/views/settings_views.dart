@@ -2,10 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:get/get.dart'; // <-- 1. Tambahkan import GetX
 import '../controllers/settings_controllers.dart';
+import '../../dashboard/controllers/dashboard_controllers.dart'; // <-- 2. Tambahkan import DashboardController
 import 'widgets/settings_group.dart';
 import 'widgets/settings_item.dart';
-// DIUBAH: Perbaiki cara impor package di sini
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 
 class SettingsView extends StatefulWidget {
@@ -86,7 +87,16 @@ class _SettingsViewState extends State<SettingsView> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.go('/dashboard'),
+          // --- PERUBAHAN UTAMA DI SINI ---
+          onPressed: () {
+            // 1. Cari instance DashboardController yang sedang aktif
+            final dashboardController = Get.find<DashboardController>();
+            // 2. Panggil fungsi untuk membersihkan/mereset state-nya
+            dashboardController.clearTransaction();
+            // 3. Arahkan kembali ke halaman dashboard
+            context.go('/dashboard');
+          },
+          // --- AKHIR PERUBAHAN ---
         ),
         title: const Text('Pengaturan', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.orange,

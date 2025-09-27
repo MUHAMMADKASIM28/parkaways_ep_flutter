@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/dashboard_controllers.dart';
-import '../../models/vehicle_model.dart'; // Import model kendaraan
+import '../../models/vehicle_model.dart';
 
 class FormKendaraan extends GetView<DashboardController> {
   const FormKendaraan({super.key});
@@ -16,11 +16,11 @@ class FormKendaraan extends GetView<DashboardController> {
       final bool isActive = controller.isTransactionActive.value;
       final Color borderColor = isActive ? Colors.white54 : Colors.white12;
       final Color plateBgColor =
-      isActive ? Colors.transparent : Colors.white10;
+          isActive ? Colors.transparent : Colors.white10;
 
       final String fullPoliceNumber =
-      '${controller.platePrefixController.text} ${controller.plateNumberController.text}'
-          .trim();
+          '${controller.platePrefixController.text} ${controller.plateNumberController.text}'
+              .trim();
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,7 +54,7 @@ class FormKendaraan extends GetView<DashboardController> {
                               focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                   borderSide:
-                                  const BorderSide(color: Colors.white)),
+                                      const BorderSide(color: Colors.white)),
                             ),
                           ),
                         ),
@@ -69,7 +69,7 @@ class FormKendaraan extends GetView<DashboardController> {
                               labelText: 'Nomor Plat',
                               labelStyle: TextStyle(
                                   color:
-                                  isActive ? highlightColor : Colors.white24),
+                                      isActive ? highlightColor : Colors.white24),
                               filled: true,
                               fillColor: plateBgColor,
                               enabledBorder: OutlineInputBorder(
@@ -102,10 +102,10 @@ class FormKendaraan extends GetView<DashboardController> {
                           color: isActive ? highlightColor : Colors.white54,
                           fontSize: 16)),
                   const SizedBox(height: 12),
-                  // --- PERUBAHAN UTAMA: GridView Dinamis ---
+                  // --- GridView Dinamis ---
                   GridView.builder(
                     gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
@@ -119,7 +119,7 @@ class FormKendaraan extends GetView<DashboardController> {
                       return VehicleButton(
                         label: vehicle.name,
                         isSelected:
-                        controller.selectedVehicleId.value == vehicle.vehicleId,
+                            controller.selectedVehicleId.value == vehicle.vehicleId,
                         onTap: () => controller.changeVehicle(vehicle.vehicleId),
                         isActive: isActive,
                       );
@@ -162,7 +162,12 @@ class FormKendaraan extends GetView<DashboardController> {
               const SizedBox(width: 16),
               Expanded(
                   child: ElevatedButton(
-                      onPressed: isActive ? controller.bayarQris : null,
+                      onPressed: isActive
+                          ? () {
+                              print('DEBUG: Tombol BAYAR QRIS di form_kendaraan.dart ditekan.');
+                              controller.bayarQris(context);
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4A90E2),
                           padding: const EdgeInsets.symmetric(vertical: 20),

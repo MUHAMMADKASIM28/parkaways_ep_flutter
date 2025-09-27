@@ -8,6 +8,7 @@ import 'features/login/views/login_view.dart';
 import 'features/tiket_hilang/views/tiket_hilang_view.dart';
 import 'features/settings/views/settings_views.dart';
 import 'services/secure_storage_service.dart';
+import 'features/qris/views/qris_payment_view.dart';
 
 /// Konfigurasi rute aplikasi.
 final GoRouter router = GoRouter(
@@ -45,6 +46,15 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (BuildContext context, GoRouterState state) => const SettingsView(),
+    ),
+
+    GoRoute(
+      path: '/qris-payment',
+      builder: (BuildContext context, GoRouterState state) {
+        // Mengambil data yang dikirim dari halaman dashboard
+        final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
+        return QrisPaymentView(paymentData: data);
+      },
     ),
   ],
 

@@ -39,7 +39,7 @@ class LoginController {
       );
 
       if (loginResponse.status == "Sukses Login" && loginResponse.userId > 0) {
-        // Ambil detail lokasi dari server
+        // Ambil detail lokasi dari server (menggunakan ID lokasi 1 sesuai contoh)
         final locationDetails = await apiService.getLocationDetails(1);
 
         // Simpan semua data sesi dan lokasi
@@ -49,10 +49,13 @@ class LoginController {
         await _storageService.write('username', username);
         await _storageService.write('locationName', locationDetails.name);
         await _storageService.write('locationImage', locationDetails.image);
-        
-        // --- PERUBAHAN DI SINI ---
-        // Simpan location_code dari API dengan kunci terpisah
+        await _storageService.write('locationId', locationDetails.locationId.toString());
         await _storageService.write('apiLocationCode', locationDetails.locationCode);
+        
+        // --- PERBAIKAN UTAMA DI SINI ---
+        // Simpan 'id_userlocations' yang benar untuk QRIS
+        await _storageService.write('userLocationId', locationDetails.idUserlocations);
+        // --- AKHIR PERBAIKAN ---
 
         context.go('/dashboard');
       } else {
